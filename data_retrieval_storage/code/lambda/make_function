@@ -1,0 +1,9 @@
+aws lambda create-function \
+--region us-west-2 \
+--function-name BreathingEarthGetData \
+--zip-file fileb://deployment-package.zip \
+--role arn:aws:iam::687950879933:role/BreathingEarth \
+--handler get_data.my_handler \
+--runtime python2.7 \
+--timeout 60 \
+--memory-size 512
