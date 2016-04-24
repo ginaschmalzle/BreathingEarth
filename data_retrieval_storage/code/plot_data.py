@@ -9,6 +9,7 @@ import logging
 from datetime import datetime as dt
 import numpy as
 import datetime
+import time
 
 logging.basicConfig(filename='HISTORYlistener.log',level=logging.INFO,
                     format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
@@ -27,7 +28,6 @@ def get_dynamo_conn(environment = 'local'):
     return conn
 
 def toYearFraction(mydate):
-    print mydate
     date = datetime.datetime.strptime(str(mydate), '%Y-%m-%d %H:%M:%S')
     def sinceEpoch(date): # returns seconds since epoch
         return time.mktime(date.timetuple())
