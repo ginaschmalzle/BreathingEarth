@@ -7,8 +7,10 @@ import pandas as pd
 from time import sleep
 import logging
 from datetime import datetime as dt
+import numpy as
+import datetime
 
-logging.basicConfig(filename='HISTORYlistener.log',level=logging.DEBUG,
+logging.basicConfig(filename='HISTORYlistener.log',level=logging.INFO,
                     format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
                     datefmt="%Y-%m-%d %H:%M:%S")
 
@@ -53,6 +55,8 @@ def get_medians_df(conn):
     while True:
         try:
             item = medians.next()
+            site = item['site']
+            print 'Got site {0}'.format(site)
         except boto.dynamodb2.exceptions.ProvisionedThroughputExceededException:
             sleepTime = min(60, (2.**retries)/10.)
             logging.info('Sleeping for %.02f secs' % sleepTime)
@@ -89,8 +93,5 @@ def plot_data(df, results, site):
     ax.plot(df['Dec_Date'], df['Up'], 'o', label='Up vel')
     ax.plot(df['Dec_Date'], results.fittedvalues, 'r--', linewidth = 4, label='OLS')
     ax.plot(df['Dec_Date'], df['rolling_mean'], linewidth = 6, label='rolling_mean')
-    plt.xlabel(site)
-    plt.show()
-, df['rolling_mean'], linewidth = 6, label='rolling_mean')
     plt.xlabel(site)
     plt.show()
