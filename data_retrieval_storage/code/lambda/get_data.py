@@ -25,7 +25,7 @@ event = { 'site' : 'ALBH',
 # LIB_DIR = os.path.join(SCRIPT_DIR, 'lib')
 
 def my_handler(event, context):
-    download = False  # False for testing only
+    download = True  # False for testing only
 
     def get_positions(site, download):
         '''Download positions from UNAVCO FTP site'''
@@ -130,7 +130,7 @@ def my_handler(event, context):
         med_data = { 'site' : site }
         lat = coordinate_data['lat']; lon = coordinate_data['lon']
         if lon >= 232. and lon <= 242.:
-            if lat >= 42. and lat <= 50.:
+            if lat >= 40. and lat <= 50.:
                 med_data.update({ 'region' : 'pnw' })
             else:
                 med_data.update({ 'region' : 'other' })
@@ -165,7 +165,7 @@ def my_handler(event, context):
                 print ('No need to update rolling median for site {0}'.format(site))
 
     def remove_site_file(site):
-        filename = '{0}.pbo.final_nam08.pos'
+        filename = '{0}.pbo.final_nam08.pos'.format(site)
         os.system('rm {0}'.format(filename))
 
     def run(event):
@@ -178,16 +178,16 @@ def my_handler(event, context):
         lines, coordinate_data = read_csv_contents('{0}.pbo.final_nam08.pos'.format(site), site)
         lat = coordinate_data['lat']; lon = coordinate_data['lon']
         if lon >= 232. and lon <= 242.:
-            if lat >= 42. and lat <= 50.:
+            if lat >= 40. and lat <= 50.:
                 print ('Getting info from {0} at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
                 df = get_dataframe(lines)
                 send_coordinates(conn, coordinate_data)
                 send_pos(conn, df, site)
                 send_medians(conn, df, site, coordinate_data)
-                end = time.time()
         else:
             print ('Site {0} not in range at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
         remove_site_file(site)
+        end = time.time()
         message = 'It took {0} seconds to complete tasks.'.format(end-start)
         return message
     message = run(event)

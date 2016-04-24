@@ -46,7 +46,6 @@ def get_sites():
 def run(async = True, environment = 'local'):
     # download_pos_files()
     sites = get_sites()
-    sites = sites[19:]
     context = {}
     if environment == 'local':
         if async == True:
@@ -62,4 +61,3 @@ def run(async = True, environment = 'local'):
                           'problem_site' : False }
                 message = my_handler(event, context)
                 print message
-run()
