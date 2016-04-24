@@ -5,7 +5,7 @@ import boto
 import boto.dynamodb2
 from boto.dynamodb2.table import Table
 import decimal
-# import subprocess
+import logging
 
 '''
 example event, if run locally:
@@ -21,10 +21,10 @@ event = { 'site' : 'ALBH',
 
 '''
 
-# SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# LIB_DIR = os.path.join(SCRIPT_DIR, 'lib')
-
 def my_handler(event, context):
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+    formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s",
+                              "%Y-%m-%d %H:%M:%S")
     download = True  # False for testing only
 
     def get_positions(site, download):
@@ -75,7 +75,7 @@ def my_handler(event, context):
         try:
             site_coordinates.put_item(data = coordinate_data)
         except:
-            print ('Site already in DB, updating values if different.')
+            logging.info('Site already in DB, updating values if different.')
             item = site_coordinates.get_item(site = coordinate_data['site'])
             update = False
             if coordinate_data['lat'] != item['lat']:
@@ -85,10 +85,10 @@ def my_handler(event, context):
                 item['lon'] = coordinate_data['lon']
                 update = True
             if update == True:
-                print ('Old values differ from new.  Updating coordinates for site {0}'.format(coordinate_data['site']))
+                logging.info('Old values differ from new.  Updating coordinates for site {0}'.format(coordinate_data['site']))
                 item.partial_save()
             if update == False:
-                print ('Items are the same, no change for site {0}'.format(coordinate_data['site']))
+                logging.info('Items are the same, no change for site {0}'.format(coordinate_data['site']))
 
 
     def send_pos(conn, df, site):
@@ -104,24 +104,26 @@ def my_handler(event, context):
         try:
             pos_table.put_item(data = pos_data)
         except:
-            print ('Site already in DB, updating values.')
-            item = pos_table.get_item(site=site)
-            keys = pos_data.keys()
-            update = False
-            for key in keys:
-                try:
-                    if item[key] != pos_data[key]:
+            try:
+                logging.info('Site already in DB, updating values.')
+                item = pos_table.get_item(site=site)
+                keys = pos_data.keys()
+                update = False
+                for key in keys:
+                    try:
+                        if item[key] != pos_data[key]:
+                            item[key] = pos_data[key]
+                            update = True
+                    except:
                         item[key] = pos_data[key]
                         update = True
-                except:
-                    item[key] = pos_data[key]
-                    update = True
-            if update == True:
-                item.partial_save()
-                print ('Positions for site {0} updated'.format(site))
-            else:
-                print ('No need to update Positions for site {0}'.format(site))
-
+                if update == True:
+                    item.partial_save()
+                    logging.info('Positions for site {0} updated'.format(site))
+                else:
+                    logging.info('No need to update Positions for site {0}'.format(site))
+            except:
+                logging.error('Problem loading positions for site {0}'.format(site))
 
     def send_medians(conn, df, site, coordinate_data):
         '''Send calculated rolling medians to medians table. Function
@@ -139,30 +141,33 @@ def my_handler(event, context):
         med_data.update({ 'problem_site' :  False })
         for i in range(0, len(df['Date'])):
             med_data.update({str(df['Date'][i]): str(df['rolling_median'][i])})
-        print ('Site = {0}'.format(site))
-        print ('med_data region = {0}'.format(str(med_data['region'])))
-        print ('med_data site = {0}'.format(str(med_data['site'])))
+        logging.info('Site = {0}'.format(site))
+        logging.info('med_data region = {0}'.format(str(med_data['region'])))
+        logging.info('med_data site = {0}'.format(str(med_data['site'])))
         median_table = Table('median_positions', connection = conn)
         try:
             median_table.put_item(data = med_data)
         except:
-            print ('Site already in DB, updating values.')
-            item = median_table.get_item(region='pnw', site=site)
-            keys = med_data.keys()
-            update = False
-            for key in keys:
-                try:
-                    if item[key] != med_data[key]:
+            try:
+                logging.info('Site already in Median DB, updating values.')
+                item = median_table.get_item(region='pnw', site=site)
+                keys = med_data.keys()
+                update = False
+                for key in keys:
+                    try:
+                        if item[key] != med_data[key]:
+                            item[key] = med_data[key]
+                            update = True
+                    except:
                         item[key] = med_data[key]
                         update = True
-                except:
-                    item[key] = med_data[key]
-                    update = True
-            if update == True:
-                item.partial_save()
-                print ('Rolling Median for site {0} updated'.format(site))
-            else:
-                print ('No need to update rolling median for site {0}'.format(site))
+                if update == True:
+                    item.partial_save()
+                    logging.info('Rolling Median for site {0} updated'.format(site))
+                else:
+                    logging.info('No need to update rolling median for site {0}'.format(site))
+            except:
+                logging.error('Problem loading medians for site {0}'.format(site))
 
     def remove_site_file(site):
         filename = '{0}.pbo.final_nam08.pos'.format(site)
@@ -179,13 +184,13 @@ def my_handler(event, context):
         lat = coordinate_data['lat']; lon = coordinate_data['lon']
         if lon >= 232. and lon <= 242.:
             if lat >= 40. and lat <= 50.:
-                print ('Getting info from {0} at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
+                logging.info('Getting info from {0} at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
                 df = get_dataframe(lines)
                 send_coordinates(conn, coordinate_data)
                 send_pos(conn, df, site)
                 send_medians(conn, df, site, coordinate_data)
         else:
-            print ('Site {0} not in range at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
+            logging.info('Site {0} not in range at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
         remove_site_file(site)
         end = time.time()
         message = 'It took {0} seconds to complete tasks.'.format(end-start)

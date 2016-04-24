@@ -3,11 +3,11 @@ import os
 import pandas as pd
 import concurrent.futures
 import glob
+import logging
 
-def download_pos_files():
-    os.system('wget ftp://data-out.unavco.org/pub/products/position/pbo.nam08.pos.tar.gz')
-    os.system('tar -zxvf pbo.nam08.pos.tar.gz')
-    os.system('rm *.csv')
+logging.basicConfig(filename='HISTORYlistener.log',level=logging.DEBUG,
+                    format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
+                    datefmt="%Y-%m-%d %H:%M:%S")
 
 def read_csv_contents(pos_filename):
     ''' Read contents of csv and format for a dataframe.  Also collect site coordinates.'''
@@ -23,17 +23,9 @@ def read_csv_contents(pos_filename):
     return lines[35:], coordinate_data
 
 def get_sites():
-    ''' Define dataframe.  Also modify some columns to the correct data type. '''
-    # all_sites = [x[:4] for x in glob.glob('*.pos')]
-    # sites = []
-    # for site in all_sites:
-    #     filename = '{0}.pbo.nam08.pos'.format(site)
-    #     lines, coordinate_data = read_csv_contents(filename)
-    #     lat = coordinate_data['lat']; lon = coordinate_data['lon']
-    #     if lon >= 232. and lon <= 242.:
-    #         if lat >= 42. and lat <= 50.:
-    #             sites.append(site)
-    # unique_sites = list(set(sites))
+    '''Return a list of unique sites in the UNAVCO FTP site.
+    The file ftpsource_sites.dat is part of the website's
+    'View Source' page.'''
     filename = 'ftpsource_sites.dat'
     with open(filename, 'r') as f:
         sites = []
@@ -44,8 +36,18 @@ def get_sites():
     return unique_sites
 
 def run(async = True, environment = 'local'):
-    # download_pos_files()
+    '''Get the sites, and call get_data to load them.
+    If environment == local, the script assumes get_data.py is in
+    the working directory.  Otherwise, it assumes that it is a
+    lambda function (not yet implemented).
+
+    LAMBDA FUNCTION PROBLEM:  COULD NOT GET PANDAS AND NUMPY TO LOAD.
+
+    ALSO NOTE -- ASYNC HAS A PROBLEM -- NOT ALL SITES LOADED.  I THINK
+    THE PROBLEM CAN BE RESOLVED WITH AS_COMPLETED BUT STILL NEED TO TEST.'''
+
     sites = get_sites()
+    # sites = [x[:4] for x in glob.glob('*.pos')]
     context = {}
     if environment == 'local':
         if async == True:
@@ -60,4 +62,8 @@ def run(async = True, environment = 'local'):
                 event = { 'site' : site,
                           'problem_site' : False }
                 message = my_handler(event, context)
-                print message
+                logging.info(message)
+    else if enivronment == 'lambda':
+        pass
+    else:
+        pass
