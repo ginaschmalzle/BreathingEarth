@@ -1,11 +1,11 @@
 import os
 import pandas as pd
 import time
-import numpy as np
 import boto
 import boto.dynamodb2
 from boto.dynamodb2.table import Table
 import decimal
+# import subprocess
 
 '''
 example event, if run locally:
@@ -21,17 +21,20 @@ event = { 'site' : 'ALBH',
 
 '''
 
-def my_handler(event, context):
-    download = True  # False for testing only
+# SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# LIB_DIR = os.path.join(SCRIPT_DIR, 'lib')
 
-    def get_velocities(site, download):
+def my_handler(event, context):
+    download = False  # False for testing only
+
+    def get_positions(site, download):
         '''Download positions from UNAVCO FTP site'''
         if download == True:
             os.system('wget ftp://data-out.unavco.org/pub/products/position/{0}/{0}.pbo.final_nam08.pos'.format(site))
 
-    def read_csv_contents(velo_filename, site):
+    def read_csv_contents(pos_filename, site):
         ''' Read contents of csv and format for a dataframe.  Also collect site coordinates.'''
-        with open(velo_filename, 'r') as f:
+        with open(pos_filename, 'r') as f:
             lines = []
             for row in f:
                 splitrows = row.split()
@@ -88,36 +91,36 @@ def my_handler(event, context):
                 print ('Items are the same, no change for site {0}'.format(coordinate_data['site']))
 
 
-    def send_vels(conn, df, site):
-        '''Send velocity observations and their uncertainties to the velocity table. Function
+    def send_pos(conn, df, site):
+        '''Send position observations and their uncertainties to the position table. Function
         checks if item exists.  If it exists, it check to see if it needs an update.  If it does
         then the item is updated. Otherwise it is left alone. '''
-        vel_data = { 'site' : site }
+        pos_data = { 'site' : site }
         for i in range(0, len(df['Date'])):
-            vel_data.update({str(df['Date'][i]):[{ 'vel' : str(df['Up'][i]),
+            pos_data.update({str(df['Date'][i]):[{ 'pos' : str(df['Up'][i]),
                                                    'uncert' : str(df['Sig'][i])
                                                  }] })
-        vels_table = Table('vertical_velocities', connection = conn)
+        pos_table = Table('vertical_positions', connection = conn)
         try:
-            vels_table.put_item(data = vel_data)
+            pos_table.put_item(data = pos_data)
         except:
             print ('Site already in DB, updating values.')
-            item = vels_table.get_item(site=site)
-            keys = vel_data.keys()
+            item = pos_table.get_item(site=site)
+            keys = pos_data.keys()
             update = False
             for key in keys:
                 try:
-                    if item[key] != vel_data[key]:
-                        item[key] = vel_data[key]
+                    if item[key] != pos_data[key]:
+                        item[key] = pos_data[key]
                         update = True
                 except:
-                    item[key] = vel_data[key]
+                    item[key] = pos_data[key]
                     update = True
             if update == True:
                 item.partial_save()
-                print ('Velocities for site {0} updated'.format(site))
+                print ('Positions for site {0} updated'.format(site))
             else:
-                print ('No need to update velocities for site {0}'.format(site))
+                print ('No need to update Positions for site {0}'.format(site))
 
 
     def send_medians(conn, df, site, coordinate_data):
@@ -126,15 +129,20 @@ def my_handler(event, context):
         then the item is updated. Otherwise it is left alone.'''
         med_data = { 'site' : site }
         lat = coordinate_data['lat']; lon = coordinate_data['lon']
-        if lon >= 232. and lon <= 242:
-            if lat >= 42 and lat <= 49:
+        if lon >= 232. and lon <= 242.:
+            if lat >= 42. and lat <= 50.:
                 med_data.update({ 'region' : 'pnw' })
             else:
                 med_data.update({ 'region' : 'other' })
+        else:
+            med_data.update({ 'region' : 'other' })
         med_data.update({ 'problem_site' :  False })
         for i in range(0, len(df['Date'])):
             med_data.update({str(df['Date'][i]): str(df['rolling_median'][i])})
-        median_table = Table('median_velocities', connection = conn)
+        print ('Site = {0}'.format(site))
+        print ('med_data region = {0}'.format(str(med_data['region'])))
+        print ('med_data site = {0}'.format(str(med_data['site'])))
+        median_table = Table('median_positions', connection = conn)
         try:
             median_table.put_item(data = med_data)
         except:
@@ -156,22 +164,30 @@ def my_handler(event, context):
             else:
                 print ('No need to update rolling median for site {0}'.format(site))
 
+    def remove_site_file(site):
+        filename = '{0}.pbo.final_nam08.pos'
+        os.system('rm {0}'.format(filename))
+
     def run(event):
         '''Collect site data, create dataframe, estimate the rolling median and send to
         appropriate tables.'''
+        conn = get_dynamo_conn(event)
         start = time.time()
         site = event['site']
-        print (site)
-        get_velocities(site, download)
+        get_positions(site, download)
         lines, coordinate_data = read_csv_contents('{0}.pbo.final_nam08.pos'.format(site), site)
-        df = get_dataframe(lines)
-        # results, params_data = ols_model(df, site)
-        conn = get_dynamo_conn()
-        send_coordinates(conn, coordinate_data)
-        # send_params(conn, params_data)
-        send_vels(conn, df, site)
-        send_medians(conn, df, site, coordinate_data)
-        end = time.time()
+        lat = coordinate_data['lat']; lon = coordinate_data['lon']
+        if lon >= 232. and lon <= 242.:
+            if lat >= 42. and lat <= 50.:
+                print ('Getting info from {0} at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
+                df = get_dataframe(lines)
+                send_coordinates(conn, coordinate_data)
+                send_pos(conn, df, site)
+                send_medians(conn, df, site, coordinate_data)
+                end = time.time()
+        else:
+            print ('Site {0} not in range at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
+        remove_site_file(site)
         message = 'It took {0} seconds to complete tasks.'.format(end-start)
         return message
     message = run(event)

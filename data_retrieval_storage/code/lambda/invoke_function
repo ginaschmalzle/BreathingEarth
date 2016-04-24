@@ -1,0 +1,5 @@
+aws lambda invoke \
+--function-name BreathingEarthGetData \
+--invocation-type RequestResponse \
+--payload '{ "site" : "ALBH","problem_site" : false }' \
+test.dat

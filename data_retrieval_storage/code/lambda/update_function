@@ -1,0 +1,4 @@
+./make_zip
+aws lambda update-function-code \
+--function-name BreathingEarthGetData \
+--zip-file fileb://deployment-package.zip 

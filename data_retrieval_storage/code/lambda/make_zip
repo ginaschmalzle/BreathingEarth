@@ -1,0 +1,7 @@
+cd modules/
+cp ../get_data.py .
+cp -r ../aws-lambda-numpy/* .
+zip -r deployment-package.zip *
+mv deployment-package.zip ../
+rm get_data.py
+cd ../
