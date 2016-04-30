@@ -3,7 +3,7 @@ import sys
 import utils
 import datetime
 import json
-from pandas import pd
+import pandas as pd
 
 def select_sites_that_have_data_on_date(df, start_date):
     ''' Returns a dataframe containing only sites that
@@ -56,7 +56,7 @@ def make_json(df, coords, sample_size):
             coord = coords[s]
             du_dict[grp_time].update({s: {'adj_du': adj_du,
                                       'coordinates' : coord }})
-    filename = '../data/positions_sample_size_{0}.json'.format(str(sample_size))
+    filename = '../../data/positions_sample_size_{0}.json'.format(str(sample_size))
     with open(filename, 'w') as f:
         json.dump(du_dict, f)
     return json.dumps(du_dict)
