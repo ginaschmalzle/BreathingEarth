@@ -7,7 +7,7 @@ import pandas as pd
 from time import sleep
 import logging
 from datetime import datetime as dt
-import numpy as
+import numpy as np
 import datetime
 import time
 
@@ -42,6 +42,32 @@ def toYearFraction(mydate):
     fraction = yearElapsed/yearDuration
 
     return date.year + fraction
+
+def get_dict_of_coordinates(conn, sites):
+    ''' sites is a list of sites'''
+    coordinate_table = Table('site_coordinates', connection = conn)
+    coordinate_dict = {}
+    for site in sites:
+        try:
+            item = coordinate_table.get_item(site = site)
+        except:
+            sleep(3)
+            item = coordinate_table.get_item(site = site)
+        stuff = {}
+        for i in item.items():
+            if i[0] == 'lat' or i[0] == 'lon':
+                stuff.update({ i[0]: float(i[1]) })
+            else:
+                stuff.update({ i[0]:i[1] })
+        coordinate_dict.update( { stuff['site']: { 'lat' : stuff['lat'],
+                                                   'lon' : stuff['lon'] }})
+    return coordinate_dict
+
+def get_site_obs(conn, site):
+    logging.info('Getting raw observations for site {0}'.format(site))
+    obs_table = Table('vertical_positions', connection = conn)
+    item = obs_table.get_item(site = site)
+    return item.items()
 
 def get_medians_df(conn):
     logging.info('Connecting to Median table')
