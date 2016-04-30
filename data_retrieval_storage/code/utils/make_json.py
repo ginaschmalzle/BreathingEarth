@@ -67,4 +67,4 @@ def run(start_date = '2008-01-01', sample_size = 30):
     selected_df = select_sites_that_have_data_on_date(df, start_date)
     s_df = sample_df(selected_df, sample_size, start_date)
     coords = utils.get_dict_of_coordinates(conn, s_df.site.unique())
-    du_json = make_json(sample_df, coords, sample_size)
+    du_json = make_json(s_df, coords, sample_size)
