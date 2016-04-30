@@ -39,10 +39,10 @@ def get_dates(start_date, sample_size):
 
 def sample_df(selected_df, sample_size, start_date):
     time_list = get_dates(start_date, sample_size)
-    sample_df = pd.DataFrame(columns = selected_df.columns)
+    s_df = pd.DataFrame(columns = selected_df.columns)
     for t in time_list:
-        sample_df = sample_df.append(selected_df.loc[selected_df.datetime == t])
-    return sample_df
+        s_df = s_df.append(selected_df.loc[selected_df.datetime == t])
+    return s_df
 
 
 def make_json(df, coords, sample_size):
@@ -65,6 +65,6 @@ def run(start_date = '2008-01-01', sample_size = 30):
     conn = utils.get_dynamo_conn()
     df = utils.get_medians_df(conn)
     selected_df = select_sites_that_have_data_on_date(df, start_date)
-    sample_df = sample_df(selected_df, sample_size, start_date)
-    coords = utils.get_dict_of_coordinates(conn, sample_df.site.unique())
+    s_df = sample_df(selected_df, sample_size, start_date)
+    coords = utils.get_dict_of_coordinates(conn, s_df.site.unique())
     du_json = make_json(sample_df, coords, sample_size)

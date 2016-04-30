@@ -60,7 +60,7 @@ def get_dict_of_coordinates(conn, sites):
             else:
                 stuff.update({ i[0]:i[1] })
         coordinate_dict.update( { stuff['site']: { 'lat' : stuff['lat'],
-                                                   'lon' : stuff['lon'] }})
+                                                   'lng' : stuff['lon'] }})
     return coordinate_dict
 
 def get_site_obs(conn, site):
@@ -112,12 +112,3 @@ def get_medians_df(conn):
     all_df['du'] = my_pos
     logging.info('Finished writing to dataframe.')
     return all_df
-
-
-def plot_data(df, results, site):
-    fig, ax = plt.subplots(figsize=(8,6))
-    ax.plot(df['Dec_Date'], df['Up'], 'o', label='Up vel')
-    ax.plot(df['Dec_Date'], results.fittedvalues, 'r--', linewidth = 4, label='OLS')
-    ax.plot(df['Dec_Date'], df['rolling_mean'], linewidth = 6, label='rolling_mean')
-    plt.xlabel(site)
-    plt.show()
