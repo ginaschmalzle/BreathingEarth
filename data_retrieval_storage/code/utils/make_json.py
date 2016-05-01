@@ -45,7 +45,7 @@ def sample_df(selected_df, sample_size, start_date):
     return s_df
 
 
-def make_json(df, coords, sample_size):
+def make_json(df, sample_size):
     grouped = df.groupby('datetime')
     du_dict = {}
     for a, groupdf in grouped:
@@ -53,9 +53,7 @@ def make_json(df, coords, sample_size):
         du_dict[grp_time] = {}
         for s in groupdf.site:
             adj_du = groupdf.loc[groupdf.site == s]['adj_du'].values[0]
-            coord = coords[s]
-            du_dict[grp_time].update({s: {'adj_du': adj_du,
-                                      'coordinates' : coord }})
+            du_dict[grp_time].update({s: adj_du})
     filename = '../../data/positions_sample_size_{0}.json'.format(str(sample_size))
     with open(filename, 'w') as f:
         json.dump(du_dict, f)
@@ -65,6 +63,6 @@ def run(start_date = '2008-01-01', sample_size = 30):
     conn = utils.get_dynamo_conn()
     df = utils.get_medians_df(conn)
     selected_df = select_sites_that_have_data_on_date(df, start_date)
+    coords = utils.get_dict_of_coordinates(conn, selected_df.site.unique())
     s_df = sample_df(selected_df, sample_size, start_date)
-    coords = utils.get_dict_of_coordinates(conn, s_df.site.unique())
-    du_json = make_json(s_df, coords, sample_size)
+    du_json = make_json(s_df, sample_size)

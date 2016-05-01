@@ -10,6 +10,7 @@ from datetime import datetime as dt
 import numpy as np
 import datetime
 import time
+import json
 
 logging.basicConfig(filename='HISTORYlistener.log',level=logging.INFO,
                     format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
@@ -61,6 +62,9 @@ def get_dict_of_coordinates(conn, sites):
                 stuff.update({ i[0]:i[1] })
         coordinate_dict.update( { stuff['site']: { 'lat' : stuff['lat'],
                                                    'lng' : stuff['lon'] }})
+    filename = '../../data/coordinates.json'
+    with open(filename, 'w') as f:
+        json.dump(coordinate_dict, f)
     return coordinate_dict
 
 def get_site_obs(conn, site):
