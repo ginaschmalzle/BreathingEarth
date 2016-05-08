@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.ticker import FuncFormatter
+from mpl_toolkits.basemap import Basemap
 import boto
 import boto.dynamodb2
 from boto.dynamodb2.table import Table
@@ -44,7 +45,7 @@ def make_xlabel(site, coordinate_dict):
     label ='{0}, Lat = {1} N, Lon = {2} W'.format(site, lat, lon)
     return label
 
-def plot_single_site(df, site, coordinate_dict, fig_size=(14,6), show = True):
+def plot_single_site_ts(df, site, coordinate_dict, fig_size=(14,6), show = True):
     site_df = df.loc[ df['site'] == site ]
     fig, ax = plt.subplots(figsize=fig_size)
     ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: '%.0f'%x))
@@ -56,7 +57,7 @@ def plot_single_site(df, site, coordinate_dict, fig_size=(14,6), show = True):
     if show == True:
         plt.show()
 
-def plot_subplot(df, site, coordinate_dict, ax, fig_size=(14,6)):
+def plot_subplot_ts(df, site, coordinate_dict, ax, fig_size=(14,6)):
     site_df = df.loc[ (df['site'] == site) & (df['Dec_time'] >= 2008.0)]
     ax.set_title(make_xlabel(site, coordinate_dict))
     ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: '%.0f'%x))
@@ -64,7 +65,7 @@ def plot_subplot(df, site, coordinate_dict, ax, fig_size=(14,6)):
     ax.plot([2008,2016],[0,0], color = 'red')
     plt.ylabel('Vertical Position (mm)')
 
-def plot_subset_of_sites(df, subset_sites, rows, columns, coordinate_dict, show = True, filename = None):
+def plot_subset_of_site_ts(df, subset_sites, rows, columns, coordinate_dict, show = True, filename = None):
     '''Subset should contain 4 or less sites.'''
     f, plots = plt.subplots(rows, columns, sharex=True, sharey=True)
     plt.xlim(2008.0, 2016.0)
@@ -77,7 +78,7 @@ def plot_subset_of_sites(df, subset_sites, rows, columns, coordinate_dict, show 
                 pl = item
                 site = subset_sites[i]
                 i = i + 1
-                plot_subplot(df, site, coordinate_dict, pl, fig_size = fig_size)
+                plot_subplot_ts(df, site, coordinate_dict, pl, fig_size = fig_size)
             except:
                 pass
     plt.savefig(filename)
@@ -98,7 +99,7 @@ def get_site_lol(sites, n_sites_per_page):
     site_lol.append(site_temp)
     return site_lol
 
-def plot_all_sites(df, coordinate_dict):
+def plot_all_site_ts(df, coordinate_dict):
     rows = 4; columns = 4
     sites = df['site'].unique()
     site_lol = get_site_lol(sites, rows * columns)
@@ -106,13 +107,47 @@ def plot_all_sites(df, coordinate_dict):
     for subset_sites in site_lol:
         filename = 'figures/time_series_' + str(i) + '.png'
         i = i + 1
-        plot_subset_of_sites(df,
-                             subset_sites,
-                             rows,
-                             columns,
-                             coordinate_dict,
-                             show = False,
-                             filename = filename)
+        plot_subset_of_site_ts(df,
+                               subset_sites,
+                               rows,
+                               columns,
+                               coordinate_dict,
+                               show = False,
+                               filename = filename)
+        plt.close()
+
+def plot_sites_on_map(coordinate_dict, problem_sites):
+    m = Basemap(projection='merc',llcrnrlat=40,urcrnrlat=50,\
+            llcrnrlon=-129,urcrnrlon=-118,resolution='i')
+    # Draw the coastlines
+    m.drawcoastlines()
+    # Color the continents
+    # Bug in drawcoastlines does not allow points mapped above land. We use drawlsmask instead.
+    m.drawlsmask(land_color='0.8', ocean_color='w')
+    # draw parallels and meridians.
+    m.drawparallels(np.arange(-90.,91.,2.), labels=[1,0,0,0], fontsize=10)
+    m.drawmeridians(np.arange(-180.,181.,2.), labels=[0,0,0,1], fontsize=10)
+    plt.title("GPS sites")
+    # Transform long and lat to the map projection
+    # Each lat and long value in the maps above are 'mapped' to specific pixels that make up the image
+    # The mapping, defined by the projection used, needs to also be done on the data set.
+    lon = []; lat = []; prob_lon = []; prob_lat = []
+    for key in coordinate_dict.keys():
+        mod_lon = (360. - float(coordinate_dict[key]['lng'])) * -1.
+        mod_lat = coordinate_dict[key]['lat']
+        lon.append(mod_lon)
+        lat.append(mod_lat)
+        if key in problem_sites:
+            prob_lon.append(mod_lon)
+            prob_lat.append(mod_lat)
+    x,y = m(lon, lat)
+    px, py = m(prob_lon, prob_lat)
+    # Now you can use the plt.scatter method to plot your data!
+    plt.scatter(x, y, s = 20)
+    plt.scatter(px, py, s = 20, color = 'red')
+    filename = 'figures/gps_map.png'
+    plt.savefig(filename)
+    plt.show()
 
 def run():
     mpl.rcParams['figure.figsize'] = [30,20]
@@ -125,4 +160,8 @@ def run():
 
     sites = df['site'].unique()
     coordinate_dict = utils.get_dict_of_coordinates(conn, sites)
-    plot_all_sites(df, coordinate_dict)
+    plot_all_site_ts(df, coordinate_dict)
+    problem_sites = ['COUP', 'P693', 'P703','P316','P664','CPUD',
+                     'P694','P705','P430','P660','CSHR','P697','PUPU',
+                     'P442','P665','ORS1','P699','P064', 'P655', 'P666',
+                     'ORS2', 'P702','P158', 'P667','P668', 'P673']
