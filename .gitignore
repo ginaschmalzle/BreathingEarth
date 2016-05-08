@@ -1,0 +1,11 @@
+env/
+env/*
+breathing_earth_app/env/
+breathing_earth_app/env/*
+data_retrieval_storage/code/modules/
+data_retrieval_storage/code/modules/*
+data_retrieval_storage/code/lambda_data_retrieval/deployment-package.zip
+data_retrieval_storage/code/lambda_data_retrieval/ftpsource_sites.dat
+data_retrieval_storage/code/lambda_data_retrieval/*.pyc
+data_retrieval_storage/code/utils/*.log
+data_retrieval_storage/code/utils/*.pyc
