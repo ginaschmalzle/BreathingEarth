@@ -44,6 +44,21 @@ def toYearFraction(mydate):
 
     return date.year + fraction
 
+def get_sites():
+    '''Return a list of unique sites in the UNAVCO FTP site.
+    The file ftpsource_sites.dat is part of the website's
+    'View Source' page.'''
+    current_dir = os.getcwd()
+    other_file = '/../lambda_data_retrieval/ftpsource_sites.dat'
+    filename = current_dir + other_file
+    with open(filename, 'r') as f:
+        sites = []
+        for row in f:
+            if row[16:20] != '..",':
+                sites.append(row[16:20])
+    unique_sites = list(set(sites))
+    return unique_sites
+
 def get_dict_of_coordinates(conn, sites):
     ''' sites is a list of sites'''
     coordinate_table = Table('site_coordinates', connection = conn)
@@ -51,17 +66,21 @@ def get_dict_of_coordinates(conn, sites):
     for site in sites:
         try:
             item = coordinate_table.get_item(site = site)
+        except boto.dynamodb2.exceptions.ItemNotFound as e:
+            print (e)
+            item = None
         except:
             sleep(3)
             item = coordinate_table.get_item(site = site)
-        stuff = {}
-        for i in item.items():
-            if i[0] == 'lat' or i[0] == 'lon':
-                stuff.update({ i[0]: float(i[1]) })
-            else:
-                stuff.update({ i[0]:i[1] })
-        coordinate_dict.update( { stuff['site']: { 'lat' : stuff['lat'],
-                                                   'lng' : stuff['lon'] }})
+        if item != None:
+            stuff = {}
+            for i in item.items():
+                if i[0] == 'lat' or i[0] == 'lon':
+                    stuff.update({ i[0]: float(i[1]) })
+                else:
+                    stuff.update({ i[0]:i[1] })
+            coordinate_dict.update( { stuff['site']: { 'lat' : stuff['lat'],
+                                                       'lng' : stuff['lon'] }})
     filename = '../../data/coordinates.json'
     with open(filename, 'w') as f:
         json.dump(coordinate_dict, f)
