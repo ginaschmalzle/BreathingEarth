@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Breathing Earth</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="/css/style.css" type="text/css" />
+
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div id="header">
+            <h2>Welcome to Breathing Earth</h2>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="container">
+            <div id="map"></div>
+        </div>
+
+        <!-- Footer -->
+    </div>
+    <!-- Load Scripts -->
+    <script src="/js/jquery-2.1.3.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/loadPoints.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{API_KEY_HERE}}&callback=initMap"></script>
+</body>
+</html>
