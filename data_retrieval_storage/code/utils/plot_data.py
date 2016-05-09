@@ -16,6 +16,7 @@ import time
 import sys
 sys.path.insert(0, '../utils/utils.py')
 import utils
+import problem_sites
 
 def select_sites_that_have_data_on_date(df, start_date):
     ''' Returns a dataframe containing only sites that
