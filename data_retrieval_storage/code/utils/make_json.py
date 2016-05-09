@@ -50,7 +50,7 @@ def remove_problem_sites(df):
     selected_df = pd.DataFrame(columns = df.columns)
     for site in sites:
         if site not in problem_sites:
-            selected_df = selected_df.append(site_df)
+            selected_df = selected_df.append(df.loc[df['site']==site])
     return selected_df
 
 def make_json(df, sample_size):
