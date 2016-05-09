@@ -4,6 +4,7 @@ import utils
 import datetime
 import json
 import pandas as pd
+from problem_sites import problem_sites
 
 def select_sites_that_have_data_on_date(df, start_date):
     ''' Returns a dataframe containing only sites that
@@ -44,6 +45,13 @@ def sample_df(selected_df, sample_size, start_date):
         s_df = s_df.append(selected_df.loc[selected_df.datetime == t])
     return s_df
 
+def remove_problem_sites(df):
+    sites = df['site'].unique()
+    selected_df = pd.DataFrame(columns = df.columns)
+    for site in sites:
+        if site not in problem_sites:
+            selected_df = selected_df.append(site_df)
+    return selected_df
 
 def make_json(df, sample_size):
     grouped = df.groupby('datetime')
@@ -63,6 +71,7 @@ def run(start_date = '2008-01-01', sample_size = 30):
     conn = utils.get_dynamo_conn()
     df = utils.get_medians_df(conn)
     selected_df = select_sites_that_have_data_on_date(df, start_date)
+    selected_df = remove_problem_sites(selected_df)
     coords = utils.get_dict_of_coordinates(conn, selected_df.site.unique())
     s_df = sample_df(selected_df, sample_size, start_date)
     du_json = make_json(s_df, sample_size)
