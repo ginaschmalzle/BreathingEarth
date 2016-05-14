@@ -97,11 +97,12 @@ def get_medians_df(conn):
     median_table = Table('median_positions', connection = conn)
     medians_pnw = median_table.query_2(region__eq='pnw')
     medians_other = median_table.query_2(region__eq='other')
+    medians_pnw = []
     logging.info('starting to write to df')
-    columns = ['time', 'pos', 'site']
+    columns = ['time', 'pos', 'site', 'datetime', 'Dec_time', 'du']
     all_df = pd.DataFrame(columns = columns)
     retries = 0
-    for medians in [ medians_pnw, medians_other ]:
+    for medians in [ medians_other, medians_pnw ]:
         while True:
             try:
                 item = medians.next()
@@ -114,11 +115,9 @@ def get_medians_df(conn):
                 item = None
                 retries += 1 if retries < 10 else 0
             except:
-                # break
-                pass
+                break
             if item == None:
-                # continue
-                pass
+                continue
             else:
                 site = item['site']; region = item['region']
                 logging.info('Importing site {0}'.format(site))
@@ -126,15 +125,15 @@ def get_medians_df(conn):
                 df['site'] = pd.DataFrame(site, index=np.arange(len(df['time'])),columns=['site'])
                 df = df[df.time != 'region']; df = df[df.time != 'site']; df = df[df.time != 'problem_site']
                 logging.info(df.columns)
+                df['datetime'] = pd.to_datetime(df['time'], format='%Y-%m-%d %H:%M:%S')
+                times = []
+                for t in df['datetime']:
+                    times.append(toYearFraction(t))
+                df['Dec_time'] = times
+                my_pos = []
+                for item in df['pos']:
+                    my_pos.append(float(item))
+                df['du'] = my_pos
                 all_df = all_df.append(df)
-    all_df['datetime'] = pd.to_datetime(all_df['time'], format='%Y-%m-%d %H:%M:%S')
-    times = []
-    for t in all_df['datetime']:
-        times.append(toYearFraction(t))
-    all_df['Dec_time'] = times
-    my_pos = []
-    for item in all_df['pos']:
-        my_pos.append(float(item))
-    all_df['du'] = my_pos
     logging.info('Finished writing to dataframe.')
     return all_df

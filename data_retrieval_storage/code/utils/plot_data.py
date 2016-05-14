@@ -18,29 +18,6 @@ sys.path.insert(0, '../utils/utils.py')
 import utils
 import problem_sites
 
-def select_sites_that_have_data_on_date(df, start_date):
-    ''' Returns a dataframe containing only sites that
-    have data on start_date.  The value of the vertical
-    position on that date is then used as a reference date
-    and is subtracted from all other values for that site.
-    Date in format 'YYYY-MM-DD' '''
-    # Select sites
-    # Only use values that start on or after start_date
-    df = df.loc[(df.Dec_time >= start_date)]
-    selected_sites = df.loc[(df.Dec_time == start_date)]
-    selected_df = pd.DataFrame(columns = df.columns)
-    for s in selected_sites.site.unique():
-        # Get value of du at start date
-        # zero_du = df.loc[(df.Dec_time == start_date) & (df.site == s)]['du'].unique()
-        oneyear = df.loc[ (df['Dec_time'] >= start_date) & (df['Dec_time'] >= (start_date + 365)) ]['du']
-        zero_du = oneyear.median()
-        # Only collect information on the site
-        site_df = df.loc[df.site == s]
-        # Create an adjusted du column, that subtracts the vertical position
-        # on the first day
-        site_df['adj_du'] = site_df['du'] - zero_du[0]
-        selected_df = selected_df.append(site_df)
-    return selected_df
 
 def make_xlabel(site, coordinate_dict):
     lat = round(coordinate_dict[site]['lat'], 3)
@@ -68,7 +45,7 @@ def plot_subplot_ts(df, site, coordinate_dict, ax, fig_size=(14,6)):
     ax.plot([2008,2016],[0,0], color = 'red')
     plt.ylabel('Vertical Position (mm)')
 
-def plot_subset_of_site_ts(df, subset_sites, rows, columns, coordinate_dict, show = True, filename = None):
+def plot_subset_of_site_ts(df, subset_sites, rows, columns, coordinate_dict, show = False, filename = None):
     '''Subset should contain 4 or less sites.'''
     f, plots = plt.subplots(rows, columns, sharex=True, sharey=True)
     plt.xlim(2008.0, 2016.0)
@@ -102,22 +79,17 @@ def get_site_lol(sites, n_sites_per_page):
     site_lol.append(site_temp)
     return site_lol
 
-def plot_all_site_ts(df, coordinate_dict):
-    rows = 4; columns = 4
+def plot_all_site_ts(df, coordinate_dict, rows, columns, n):
     sites = df['site'].unique()
-    site_lol = get_site_lol(sites, rows * columns)
-    i = 0
-    for subset_sites in site_lol:
-        filename = 'figures/time_series_' + str(i) + '.png'
-        i = i + 1
-        plot_subset_of_site_ts(df,
-                               subset_sites,
-                               rows,
-                               columns,
-                               coordinate_dict,
-                               show = False,
-                               filename = filename)
-        plt.close()
+    filename = 'figures/time_series_' + str(n) + '.png'
+    plot_subset_of_site_ts(df,
+                           sites,
+                           rows,
+                           columns,
+                           coordinate_dict,
+                           show = False,
+                           filename = filename)
+    plt.close()
 
 def plot_sites_on_map(coordinate_dict, problem_sites):
     m = Basemap(projection='merc',llcrnrlat=40,urcrnrlat=50,\
@@ -152,15 +124,67 @@ def plot_sites_on_map(coordinate_dict, problem_sites):
     plt.savefig(filename)
     plt.show()
 
+
+def get_table_data(medians, myrange, start_time):
+    logging.info('starting to write to df')
+    columns = ['time', 'pos', 'site', 'datetime', 'Dec_time', 'du']
+    all_df = pd.DataFrame(columns = columns)
+    retries = 0
+    i = 0; b = False
+    while i in range(0, myrange):
+        try:
+            item = medians.next()
+            site = item['site']
+            print 'Got site {0}'.format(site)
+        except boto.dynamodb2.exceptions.ProvisionedThroughputExceededException:
+            sleepTime = min(60, (2.**retries)/10.)
+            logging.info('Sleeping for %.02f secs' % sleepTime)
+            sleep(sleepTime)
+            item = None
+            retries += 1 if retries < 10 else 0
+        except:
+            b = True
+            break
+        if item == None:
+            continue
+        else:
+            site = item['site']; region = item['region']
+            logging.info('Importing site {0}'.format(site))
+            df = pd.DataFrame(item.items(), columns = ['time', 'pos'])
+            df['site'] = pd.DataFrame(site, index=np.arange(len(df['time'])),columns=['site'])
+            df = df[df.time != 'region']; df = df[df.time != 'site']; df = df[df.time != 'problem_site']
+            logging.info(df.columns)
+            df['datetime'] = pd.to_datetime(df['time'], format='%Y-%m-%d %H:%M:%S')
+            times = []
+            for t in df['datetime']:
+                times.append(utils.toYearFraction(t))
+            df['Dec_time'] = times
+            if len(df.loc[df.Dec_time == float(start_time)]) != 0:
+                my_pos = []
+                for item in df['pos']:
+                    my_pos.append(float(item))
+                df['du'] = my_pos
+                zero_du = df.loc[(df.Dec_time == start_date)]['du'].unique()
+                df['adj_du'] = df['du'] - zero_du
+                all_df = all_df.append(df)
+                i = i + 1
+    return all_df, medians, b
+
 def run():
     mpl.rcParams['figure.figsize'] = [30,20]
     mpl.rcParams.update({'font.size': 16})
     mpl.rcParams['figure.titlesize'] = 'medium'
-
     conn = utils.get_dynamo_conn(environment = 'local')
-    df_all = utils.get_medians_df(conn)
-    df = select_sites_that_have_data_on_date(df_all, 2008.0)
-
-    sites = df['site'].unique()
-    coordinate_dict = utils.get_dict_of_coordinates(conn, sites)
-    plot_all_site_ts(df, coordinate_dict)
+    median_table = Table('median_positions', connection = conn)
+    medians_pnw = median_table.query_2(region__eq='pnw')
+    medians_other = median_table.query_2(region__eq='other')
+    rows = 4; columns = 4
+    start_date = 2008.0
+    n = 0; b == False
+    for medians in [medians_other]:
+        while b == False:
+            df, medians, b = get_table_data(medians, rows * columns, start_date)
+            sites = df['site'].unique()
+            coordinate_dict = utils.get_dict_of_coordinates(conn, sites)
+            plot_all_site_ts(df, coordinate_dict, rows, columns, n)
+            n = n + 1
