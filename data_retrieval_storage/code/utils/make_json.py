@@ -19,7 +19,9 @@ def select_sites_that_have_data_on_date(df, start_date):
     selected_df = pd.DataFrame(columns = df.columns)
     for s in selected_sites.site.unique():
         # Get value of du at start date
-        zero_du = df.loc[(df.datetime == start_date) & (df.site == s)]['du'].unique()
+        # zero_du = df.loc[(df.datetime == start_date) & (df.site == s)]['du'].unique()
+        oneyear = df.loc[ (df['Dec_time'] >= 2008.0) & (df['Dec_time'] >= 2009.0) ]['du']
+        zero_du = oneyear.median()
         # Only collect information on the site
         site_df = df.loc[df.site == s]
         # Create an adjusted du column, that subtracts the vertical position

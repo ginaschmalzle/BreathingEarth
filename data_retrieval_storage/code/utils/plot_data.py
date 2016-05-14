@@ -31,7 +31,9 @@ def select_sites_that_have_data_on_date(df, start_date):
     selected_df = pd.DataFrame(columns = df.columns)
     for s in selected_sites.site.unique():
         # Get value of du at start date
-        zero_du = df.loc[(df.Dec_time == start_date) & (df.site == s)]['du'].unique()
+        # zero_du = df.loc[(df.Dec_time == start_date) & (df.site == s)]['du'].unique()
+        oneyear = df.loc[ (df['Dec_time'] >= start_date) & (df['Dec_time'] >= (start_date + 365)) ]['du']
+        zero_du = oneyear.median()
         # Only collect information on the site
         site_df = df.loc[df.site == s]
         # Create an adjusted du column, that subtracts the vertical position
@@ -162,7 +164,3 @@ def run():
     sites = df['site'].unique()
     coordinate_dict = utils.get_dict_of_coordinates(conn, sites)
     plot_all_site_ts(df, coordinate_dict)
-    problem_sites = ['COUP', 'P693', 'P703','P316','P664','CPUD',
-                     'P694','P705','P430','P660','CSHR','P697','PUPU',
-                     'P442','P665','ORS1','P699','P064', 'P655', 'P666',
-                     'ORS2', 'P702','P158', 'P667','P668', 'P673']

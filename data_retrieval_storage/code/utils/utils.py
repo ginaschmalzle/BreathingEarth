@@ -95,35 +95,38 @@ def get_site_obs(conn, site):
 def get_medians_df(conn):
     logging.info('Connecting to Median table')
     median_table = Table('median_positions', connection = conn)
-    medians = median_table.query_2(region__eq='pnw')
-    logging.info('Queried Medians in PNW')
+    medians_pnw = median_table.query_2(region__eq='pnw')
+    medians_other = median_table.query_2(region__eq='other')
     logging.info('starting to write to df')
     columns = ['time', 'pos', 'site']
     all_df = pd.DataFrame(columns = columns)
     retries = 0
-    while True:
-        try:
-            item = medians.next()
-            site = item['site']
-            print 'Got site {0}'.format(site)
-        except boto.dynamodb2.exceptions.ProvisionedThroughputExceededException:
-            sleepTime = min(60, (2.**retries)/10.)
-            logging.info('Sleeping for %.02f secs' % sleepTime)
-            sleep(sleepTime)
-            item = None
-            retries += 1 if retries < 10 else 0
-        except:
-            break
-        if item == None:
-            continue
-        else:
-            site = item['site']; region = item['region']
-            logging.info('Importing site {0}'.format(site))
-            df = pd.DataFrame(item.items(), columns = ['time', 'pos'])
-            df['site'] = pd.DataFrame(site, index=np.arange(len(df['time'])),columns=['site'])
-            df = df[df.time != 'region']; df = df[df.time != 'site']; df = df[df.time != 'problem_site']
-            logging.info(df.columns)
-            all_df = all_df.append(df)
+    for medians in [ medians_pnw, medians_other ]:
+        while True:
+            try:
+                item = medians.next()
+                site = item['site']
+                print 'Got site {0}'.format(site)
+            except boto.dynamodb2.exceptions.ProvisionedThroughputExceededException:
+                sleepTime = min(60, (2.**retries)/10.)
+                logging.info('Sleeping for %.02f secs' % sleepTime)
+                sleep(sleepTime)
+                item = None
+                retries += 1 if retries < 10 else 0
+            except:
+                # break
+                pass
+            if item == None:
+                # continue
+                pass
+            else:
+                site = item['site']; region = item['region']
+                logging.info('Importing site {0}'.format(site))
+                df = pd.DataFrame(item.items(), columns = ['time', 'pos'])
+                df['site'] = pd.DataFrame(site, index=np.arange(len(df['time'])),columns=['site'])
+                df = df[df.time != 'region']; df = df[df.time != 'site']; df = df[df.time != 'problem_site']
+                logging.info(df.columns)
+                all_df = all_df.append(df)
     all_df['datetime'] = pd.to_datetime(all_df['time'], format='%Y-%m-%d %H:%M:%S')
     times = []
     for t in all_df['datetime']:

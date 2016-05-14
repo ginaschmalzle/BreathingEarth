@@ -182,15 +182,15 @@ def my_handler(event, context):
         get_positions(site, download)
         lines, coordinate_data = read_csv_contents('{0}.pbo.final_nam08.pos'.format(site), site)
         lat = coordinate_data['lat']; lon = coordinate_data['lon']
-        if lon >= 232. and lon <= 242.:
-            if lat >= 40. and lat <= 50.:
-                logging.info('Getting info from {0} at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
-                df = get_dataframe(lines)
-                send_coordinates(conn, coordinate_data)
-                send_pos(conn, df, site)
-                send_medians(conn, df, site, coordinate_data)
-        else:
-            logging.info('Site {0} not in range at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
+        # if lon >= 232. and lon <= 242.:
+        #     if lat >= 40. and lat <= 50.:
+        logging.info('Getting info from {0} at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
+        df = get_dataframe(lines)
+        send_coordinates(conn, coordinate_data)
+        send_pos(conn, df, site)
+        send_medians(conn, df, site, coordinate_data)
+        # else:
+            # logging.info('Site {0} not in range at {1} lat, {2} lon.'.format(site, str(lat), str(lon)))
         remove_site_file(site)
         end = time.time()
         message = 'It took {0} seconds to complete tasks.'.format(end-start)

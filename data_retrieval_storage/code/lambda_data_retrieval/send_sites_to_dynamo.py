@@ -5,22 +5,13 @@ import concurrent.futures
 import glob
 import logging
 
-logging.basicConfig(filename='HISTORYlistener.log',level=logging.DEBUG,
-                    format='%(asctime)s.%(msecs)d %(levelname)s %(module)s - %(funcName)s: %(message)s',
-                    datefmt="%Y-%m-%d %H:%M:%S")
-
-def read_csv_contents(pos_filename):
-    ''' Read contents of csv and format for a dataframe.  Also collect site coordinates.'''
-    site = pos_filename[:4]
-    with open(pos_filename, 'r') as f:
-        lines = []
-        for row in f:
-            splitrows = row.split()
-            lines.append(splitrows)
-        coordinate_data = { 'site' : site,
-                            'lat' :decimal.Decimal(lines[8][4]),
-                            'lon' :decimal.Decimal(lines[8][5])}
-    return lines[35:], coordinate_data
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter(
+        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 def get_sites():
     '''Return a list of unique sites in the UNAVCO FTP site.
@@ -59,11 +50,14 @@ def run(async = True, environment = 'local'):
                 # print ([future.result() for future in concurrent.futures.as_completed(futures)])
         else:
             for site in sites:
-                event = { 'site' : site,
-                          'problem_site' : False }
-                message = my_handler(event, context)
-                logging.info(message)
-    else if enivronment == 'lambda':
+                try:
+                    event = { 'site' : site,
+                              'problem_site' : False }
+                    message = my_handler(event, context)
+                    logging.info(message)
+                except IOError as e:
+                    logging.info(e)
+    elif enivronment == 'lambda':
         pass
     else:
         pass
