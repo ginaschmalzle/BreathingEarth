@@ -1,7 +1,7 @@
 # BreathingEarth
 
 Preview:
-![alt tag](https://raw.githubusercontent.com/13scoobie/BreathingEarth/master/site/images/Breathing%20Earth.png)
+![alt tag](https://raw.githubusercontent.com/13scoobie/BreathingEarth/master/breathing_earth_app/static/images/Breathing%20Earth.png)
 
 View on github pages:
 
