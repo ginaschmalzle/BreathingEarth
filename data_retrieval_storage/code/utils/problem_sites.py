@@ -10,5 +10,9 @@ problem_sites = ['COUP', 'P693', 'P703','P316','P664','CPUD',
                  'DAM2', 'DAM3', 'ELSC', 'FST6', 'FLIN', 'GERD', 'GR8V',
                  'GRZA', 'GU52', 'INEG', 'KJUN', 'LOZ1', 'MHMS', 'MNSC',
                  'MRRN', 'MTNT', 'MTSU', 'NBPS', 'NISU', 'NLIB', 'NRWY',
-                 'OLVN', 'LONG', 'LOZ1'
-                 ]
+                 'OLVN', 'LONG', 'LOZ1', 'MCNE', 'MHMS', 'MNSC', 'P089',
+                 'P312', 'P323', 'P323', 'P477', 'P524', 'P561', 'P628',
+                 'P680', 'P708', 'PATT', 'P680', 'P708', 'PRCO', 'QUIC',
+                 'RG15', 'RG20', 'RHCL', 'PRCO', 'SCH2', 'SGHS', 'SMRT',
+                 'SLAI', 'STB1', 'SUM1', 'SUMM', 'TCA0', 'TXKR', 'TXHE',
+                 'UCSF', 'WCHS', 'WNFL']

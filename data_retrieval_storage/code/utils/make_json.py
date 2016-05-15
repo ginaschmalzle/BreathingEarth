@@ -73,6 +73,7 @@ def run(start_date = '2008-01-01', sample_size = 30):
     conn = utils.get_dynamo_conn()
     df = utils.get_medians_df(conn)
     selected_df = select_sites_that_have_data_on_date(df, start_date)
+    df = '' # Reduce amount in memory
     selected_df = remove_problem_sites(selected_df)
     coords = utils.get_dict_of_coordinates(conn, selected_df.site.unique())
     s_df = sample_df(selected_df, sample_size, start_date)

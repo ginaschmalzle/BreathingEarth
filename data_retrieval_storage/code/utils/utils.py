@@ -97,7 +97,6 @@ def get_medians_df(conn):
     median_table = Table('median_positions', connection = conn)
     medians_pnw = median_table.query_2(region__eq='pnw')
     medians_other = median_table.query_2(region__eq='other')
-    medians_pnw = []
     logging.info('starting to write to df')
     columns = ['time', 'pos', 'site', 'datetime', 'Dec_time', 'du']
     all_df = pd.DataFrame(columns = columns)
