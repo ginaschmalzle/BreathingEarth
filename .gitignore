@@ -1,5 +1,6 @@
 env/
 env/*
+*.pyc
 breathing_earth_app/env/
 breathing_earth_app/env/*
 data_retrieval_storage/code/lambda_data_retrieval/modules/

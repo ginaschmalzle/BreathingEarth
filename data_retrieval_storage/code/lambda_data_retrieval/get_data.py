@@ -84,7 +84,7 @@ def my_handler(event, context):
             if coordinate_data['lon'] != item['lon']:
                 item['lon'] = coordinate_data['lon']
                 update = True
-            if update == True:
+            if update == True
                 logging.info('Old values differ from new.  Updating coordinates for site {0}'.format(coordinate_data['site']))
                 item.partial_save()
             if update == False:
