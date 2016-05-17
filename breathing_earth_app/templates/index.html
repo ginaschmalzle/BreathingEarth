@@ -5,6 +5,18 @@
     <div class="row subsection">
         <div class="box">
             <div id="map"></div>
+            <br />
+            <div id="crossfilter" class="text-center">Cross Filter Here</div>
+            <br />
+            <table id="datatable" class="text-center table table-striped">
+            <thead>
+              <tr>
+                <th>Loc</th>
+                <th>Lat</th>
+                <th>Lng</th>
+              </tr>
+            </thead>
+            </table>
         </div>
     </div>
     <!-- Data plots -->
@@ -57,5 +69,6 @@
 
 
 <script src="{{ url_for('static', filename='js/loadPoints.js') }}"></script>
+<script defer src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>
 {% endblock %}

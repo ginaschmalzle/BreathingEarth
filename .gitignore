@@ -10,3 +10,4 @@ data_retrieval_storage/code/lambda_data_retrieval/*.pyc
 data_retrieval_storage/code/utils/*.log
 data_retrieval_storage/code/utils/*.pyc
 .DS_Store
+npm-debug.log
