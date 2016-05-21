@@ -1,10 +1,30 @@
-{% extends "layout.html" %}
-{% block body %}
+{% extends "layout.html" %} {% block body %}
 <div class="container">
     <!-- Google Map Content -->
     <div class="row subsection">
         <div class="box">
             <div id="map"></div>
+            <br />
+            <div style="width: 53%; margin: 0 auto;">
+                <p>
+                    <label for="amount">Year:</label>
+                    <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+                </p>
+                <div id="slider"></div>
+                <br />
+                <button id="play_btn" class="btn btn-success">Play</button>
+            </div>
+            <br />
+            <table id="datatable" class="text-center table table-striped">
+                <thead>
+                    <tr>
+                        <th>GPS Name</th>
+                        <th>Lat</th>
+                        <th>Lng</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+            </table>
         </div>
     </div>
     <!-- Data plots -->
@@ -54,8 +74,34 @@
         </div>
     </div>
 </div>
-
-
+<!-- Load Data -->
 <script src="{{ url_for('static', filename='js/loadPoints.js') }}"></script>
+<!-- Google Maps -->
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>
+<script>
+$(function() {
+    document.querySelector("#play_btn").addEventListener("click", function() {
+        var x = $("#slider").slider("value");
+
+        // Called the function in each second
+        var interval = setInterval(function() {
+            $("#amount").val(x);
+            $("#slider").slider('value', x);
+            console.log(x);
+
+            x++;
+            if (x > 2016) {
+                clearInterval(interval); // If exceeded 100, clear interval
+            }
+        }, 1000); // Run for each second
+    });
+});
+
+$( "#slider" ).on( "slidechange", function( event, ui ) { 
+    var date = datelistArray[ui.value];
+    parsePointsInDate(date);
+    fillTableAndPlotPoints();
+
+});
+</script>
 {% endblock %}
