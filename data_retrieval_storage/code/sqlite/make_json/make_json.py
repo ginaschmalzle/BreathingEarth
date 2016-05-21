@@ -56,7 +56,7 @@ def get_coordinates(sites):
         response = r.fetchall()
     for line in response:
         coordinate_dict.update({ line[0]: { "lat" : line[1],
-                                            "lon" : line[2] }})
+                                            "lng" : line[2] }})
     return coordinate_dict
 
 def run():
@@ -67,9 +67,10 @@ def run():
     time_step = 30
     start_medians = get_median_starts(conn)
     start_site_dict = get_start_site_dict(start_medians)
-    coordinate_dict = get_coordinates(tuple(start_site_dict.keys()))
     median_dict = make_dict_of_medians(start_site_dict, problem_sites, start_time, end_time, time_step, conn)
     med_filename = '../../../data/positions_sample_size_{0}_sqlite.json'.format(str(time_step))
     write_json_to_file(med_filename, median_dict)
+
+    coordinate_dict = get_coordinates(tuple(start_site_dict.keys()))
     coord_filename = '../../../data/coordinates_sqlite.json'
     write_json_to_file(coord_filename, coordinate_dict)
