@@ -1,5 +1,6 @@
 env/
 env/*
+*.pyc
 breathing_earth_app/env/
 breathing_earth_app/env/*
 data_retrieval_storage/code/lambda_data_retrieval/modules/
@@ -9,5 +10,6 @@ data_retrieval_storage/code/lambda_data_retrieval/ftpsource_sites.dat
 data_retrieval_storage/code/lambda_data_retrieval/*.pyc
 data_retrieval_storage/code/utils/*.log
 data_retrieval_storage/code/utils/*.pyc
+data_retrieval_storage/code/sqlite/populate_tables/breathingearth.db
 .DS_Store
 npm-debug.log

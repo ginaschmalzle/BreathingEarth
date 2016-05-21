@@ -20,6 +20,8 @@ def select_sites_that_have_data_on_date(df, start_date):
     for s in selected_sites.site.unique():
         # Get value of du at start date
         zero_du = df.loc[(df.datetime == start_date) & (df.site == s)]['du'].unique()
+        # oneyear = df.loc[ (df['Dec_time'] >= start_date) & (df['Dec_time'] >= (start_date + 3)) ]['du']
+        # zero_du = oneyear.median()
         # Only collect information on the site
         site_df = df.loc[df.site == s]
         # Create an adjusted du column, that subtracts the vertical position
@@ -71,6 +73,7 @@ def run(start_date = '2008-01-01', sample_size = 30):
     conn = utils.get_dynamo_conn()
     df = utils.get_medians_df(conn)
     selected_df = select_sites_that_have_data_on_date(df, start_date)
+    df = '' # Reduce amount in memory
     selected_df = remove_problem_sites(selected_df)
     coords = utils.get_dict_of_coordinates(conn, selected_df.site.unique())
     s_df = sample_df(selected_df, sample_size, start_date)
