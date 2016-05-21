@@ -6,9 +6,8 @@ import pandas as pd
 import numpy as np
 import datetime
 import simplekml
-
-db = '../populate_tables/breathingearth.db'
-conn = sqlite3.connect(db)
+import time
+from datetime import datetime as dt
 
 def get_precip(conn):
     cursor = conn.cursor()
@@ -49,7 +48,11 @@ def coordinates_to_kml(conn):
                      description="Vertical GPS Position (mm)",
                      coords=[(item[2]-360, item[1])])
     kml.save('gps.kml')
-    return content
+    content_dict = {}
+    for line in content:
+        content_dict.update({ line[0]: { 'lat' : line[1],
+                                         'lng' : line[2]}})
+    return content_dict
 
 def plot_sites_on_map(coordinate_dict):
     m = Basemap(projection='merc',llcrnrlat=40,urcrnrlat=50,\
@@ -123,15 +126,119 @@ def get_single_site(site, conn, min_date):
     mindf = df.loc[df.date >= min_date]
     return mindf
 
+def toYearFraction(mydate):
+    date = datetime.datetime.strptime(str(mydate), '%Y-%m-%d %H:%M:%S')
+    def sinceEpoch(date): # returns seconds since epoch
+        return time.mktime(date.timetuple())
+    s = sinceEpoch
 
-def plot_single_site_ts(df, site, coordinate_dict, fig_size=(14,6), show = True):
-    site_df = df.loc[ df['site'] == site ]
-    fig, ax = plt.subplots(figsize=fig_size)
+    year = date.year
+    startOfThisYear = dt(year=year, month=1, day=1)
+    startOfNextYear = dt(year=year+1, month=1, day=1)
+
+    yearElapsed = s(date) - s(startOfThisYear)
+    yearDuration = s(startOfNextYear) - s(startOfThisYear)
+    fraction = yearElapsed/yearDuration
+
+    return date.year + fraction
+
+def make_xlabel(site, coordinate_dict):
+    lat = round(coordinate_dict[site]['lat'], 3)
+    lon = (360 - round(coordinate_dict[site]['lng'], 3)) * -1
+    label ='{0}, Lat = {1} N, Lon = {2} W'.format(site, lat, lon)
+    return label
+
+def get_all_sites(conn, min_date):
+    sql = 'SELECT * FROM positions;'
+    with conn:
+        response = conn.execute(sql)
+    contents = response.fetchall()
+    all_df = pd.DataFrame(contents, columns = ['site', 'date', 'Position_m', 'Sig_m'])
+    all_df = all_df.loc[all_df.date >= min_date]
+    all_df['datetime'] = pd.to_datetime(all_df['date'])
+    all_df['Position_mm'] = all_df['Position_m'] * 1000
+    return mindf
+
+def plot_subplot_ts(df, site, coordinate_dict, ax, eq):
+    site_df = df.loc[ (df['site'] == site) ]
+    times = []
+    for t in site_df['datetime']:
+        times.append(toYearFraction(t))
+    site_df['Dec_time'] = times
+    ax.set_title(make_xlabel(site, coordinate_dict))
     ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: '%.0f'%x))
-    ax.scatter(site_df['Dec_time'], site_df['adj_du'] * 1000., marker = 'o', label='rolling_median')
+    ax.scatter(site_df['Dec_time'], site_df['Position_mm'], marker = 'o', label='rolling_median')
     ax.plot([2008,2016],[0,0], color = 'red')
-    plt.xlim(2008, 2016)
-    plt.xlabel(make_xlabel(site, coordinate_dict))
+    if eq == True:
+        ax.plot([2010.2546803652967,2010.2546803652967],[-100,100], color = 'red')
     plt.ylabel('Vertical Position (mm)')
+
+def plot_subset_of_site_ts(df, subset_sites, rows, columns, coordinate_dict, show, filename, eq):
+    '''Subset should contain 4 or less sites.'''
+    f, plots = plt.subplots(rows, columns, sharex=True, sharey=True)
+    plt.xlim(2008.0, 2016.0)
+    if eq == False:
+        plt.ylim(-100.0, 100.0)
+    else:
+        plt.ylim(-50.0, 50.0)
+    f.set_size_inches(15.,10., forward = True)
+    i = 0
+    for row in plots:
+        for item in row:
+            try:
+                pl = item
+                site = subset_sites[i]
+                i = i + 1
+                plot_subplot_ts(df, site, coordinate_dict, pl, eq)
+            except:
+                pass
+    plt.savefig(filename)
     if show == True:
         plt.show()
+
+def run():
+    db = '../populate_tables/breathingearth.db'
+    conn = sqlite3.connect(db)
+
+    # Make kml file for plotting on Google Earth
+    coordinate_dict = coordinates_to_kml(conn)
+
+    # Plot single site with weather data
+    min_date = '2008-01-01'
+    site = 'SEAT'
+    site_df = get_single_site(site, conn, min_date)
+    precip_df = get_precip(conn)
+    monthly_sums = get_monthly_sums(precip_df)
+    plot_weather_with_GPSsite(monthly_sums, site, site_df)
+
+    # Plot multiple plots
+    eq_sites = ['P498', 'P496', 'P497', 'P744']
+    oil_sites = ['ARM1', 'ARM2', 'P545', 'P564']
+    glacier_sites = ['AB43', 'AB50', 'ELDC', 'AB44']
+    sea_level_sites = ['CCV5', 'CCV6']
+    all_df = get_all_sites(conn, min_date)
+    rows = 2; columns = 2
+
+    mpl.rcParams.update({'font.size': 12})
+    mpl.rcParams['figure.titlesize'] = 'medium'
+    for subset_sites in [eq_sites, oil_sites, glacier_sites, sea_level_sites]:
+        eq = False
+        if subset_sites == eq_sites:
+            filename = 'eq_sites.png'
+            eq = True
+        elif subset_sites == oil_sites:
+            filename = 'oil_sites.png'
+        elif subset_sites == glacier_sites:
+            filename = 'glacier_sites.png'
+        elif subset_sites == oil_sites:
+            filename = 'sea_level_sites.png'
+        else:
+            filename = 'no_specification.png'
+        plot_subset_of_site_ts(all_df,
+                               subset_sites,
+                               rows,
+                               columns,
+                               coordinate_dict,
+                               show = False,
+                               filename = filename,
+                               eq = eq)
