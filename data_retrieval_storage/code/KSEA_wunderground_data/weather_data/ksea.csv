@@ -1,4 +1,4 @@
-PST,Max TemperatureF,Mean TemperatureF,Min TemperatureF,Max Dew PointF,MeanDew PointF,Min DewpointF,Max Humidity, Mean Humidity, Min Humidity, Max Sea Level PressureIn, Mean Sea Level PressureIn, Min Sea Level PressureIn, Max VisibilityMiles, Mean VisibilityMiles, Min VisibilityMiles, Max Wind SpeedMPH, Mean Wind SpeedMPH, Max Gust SpeedMPH,PrecipitationIn, CloudCover, Events, WindDirDegrees
+PST, Max TemperatureF, Mean TemperatureF, Min TemperatureF, Max Dew PointF, MeanDew PointF, Min DewpointF, Max Humidity, Mean Humidity, Min Humidity, Max Sea Level PressureIn, Mean Sea Level PressureIn, Min Sea Level PressureIn, Max VisibilityMiles, Mean VisibilityMiles, Min VisibilityMiles, Max Wind SpeedMPH, Mean Wind SpeedMPH, Max Gust SpeedMPH, PrecipitationIn, CloudCover, Events, WindDirDegrees
 2008-1-1,47,44,41,21,18,16,44,38,31,30.36,30.15,29.96,10,10,10,28,14,33,0.00,8,,108
 2008-1-2,46,42,37,41,37,19,100,68,36,29.97,29.90,29.78,10,7,0,16,6,24,0.40,8,Rain,141
 2008-1-3,49,45,40,41,38,34,89,78,66,29.77,29.51,29.33,10,10,7,29,11,37,0.19,8,Rain,133

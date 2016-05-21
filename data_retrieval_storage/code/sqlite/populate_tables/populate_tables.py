@@ -3,6 +3,7 @@ import decimal
 import os
 import pandas as pd
 import numpy
+import csv
 
 def get_sites():
     '''Return a list of unique sites in the UNAVCO FTP site.
@@ -86,7 +87,7 @@ def send_med_to_db(df, conn):
                 du = values[2]
                 if numpy.isnan(du) == False:
                     mytuple = (site, ts, du)
-                    sql = 'INSERT INTO medians (site, Date, rolling_median) VALUES {0}'.format(mytuple)
+                    sql = 'INSERT INTO medians (site, Date, rolling_median) VALUES {0};'.format(mytuple)
                     cursor.execute(sql)
         except Exception as e:
             print e
@@ -95,6 +96,31 @@ def send_med_to_db(df, conn):
 def remove_site_file(site):
     filename = '{0}.pbo.final_nam08.pos'.format(site)
     os.system('rm {0}'.format(filename))
+
+def get_weather_data(filename = '../../KSEA_wunderground_data/weather_data/ksea.csv'):
+    with open(filename, 'rb') as f:
+        myreader = csv.reader(f, delimiter=',')
+        header = (myreader.next())
+        for i in range(0, len(header)):
+            if ' ' in header[i]:
+                header[i] = header[i].replace(' ', '')
+        lines = [];
+        for line in myreader:
+            lines.append(tuple(line))
+    return lines, tuple(header)
+
+def send_weather_data_to_db(conn):
+    data, header = get_weather_data()
+    sql = 'INSERT INTO weather {0} VALUES {1};'
+    with conn:
+        cursor = conn.cursor()
+        try:
+            for line in data:
+                print line
+                cursor.execute(sql.format(str(header), str(line)))
+        except Exception as e:
+            print e
+    return
 
 def run():
     sites = get_sites()
