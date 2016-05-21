@@ -6,13 +6,24 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" type="text/css" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}" type="text/css" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css" />
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<!-- jQuery + Bootstrap -->
+<script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<!-- DataTables -->
+<script defer src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+<!-- jQuery slider -->
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script>
+
+</script>
 <div class="page">
-<header>
-    <div class="text-center">
-        <h2><p>Welcome to Breathing Earth</p></h2>
-    </div>
-</header>
-{% block body %}{% endblock %}
+    <header>
+        <div class="text-center">
+            <h2><p>Welcome to Breathing Earth</p></h2>
+        </div>
+    </header>
+    {% block body %}{% endblock %}
 </div>
 <footer>
     <div class="container">
@@ -40,6 +51,3 @@
         </div>
     </div>
 </footer>
-
-<script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
