@@ -178,7 +178,7 @@ def plot_subset_of_site_ts(df, subset_sites, rows, columns, coordinate_dict, sho
     f, plots = plt.subplots(rows, columns, sharex=True, sharey=True)
     plt.xlim(2008.0, 2016.0)
     if eq == False:
-        plt.ylim(-100.0, 100.0)
+        plt.ylim(-150.0, 150.0)
     else:
         plt.ylim(-50.0, 50.0)
     f.set_size_inches(15.,10., forward = True)
@@ -192,7 +192,7 @@ def plot_subset_of_site_ts(df, subset_sites, rows, columns, coordinate_dict, sho
                 plot_subplot_ts(df, site, coordinate_dict, pl, eq)
             except:
                 pass
-    plt.savefig(filename)
+    plt.savefig(filename, transparent=True)
     if show == True:
         plt.show()
 
