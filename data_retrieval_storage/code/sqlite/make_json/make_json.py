@@ -59,6 +59,25 @@ def get_coordinates(sites):
                                             "lng" : line[2] }})
     return coordinate_dict
 
+
+def get_ts_from_site(conn, site):
+    sql = 'SELECT * FROM {0} WHERE site = \"{1}\"'
+    tables = ['positions', 'medians']
+    pos_list = []; med_list = []
+    for t in tables:
+        with conn:
+            response = conn.execute(sql.format(t, site))
+        if t == 'positions':
+            positions = response.fetchall()
+        else:
+            medians = response.fetchall()
+    for item in positions:
+        pos_list.append([item[1][:10], item[2] * 1000])
+    for item in medians:
+        med_list.append([item[1][:10], item[2] * 1000])
+    return pos_list, med_list
+
+
 def run():
     db = '../populate_tables/breathingearth.db'
     conn = sqlite3.connect(db)
@@ -67,6 +86,7 @@ def run():
     time_step = 30
     start_medians = get_median_starts(conn)
     start_site_dict = get_start_site_dict(start_medians)
+
     median_dict = make_dict_of_medians(start_site_dict, problem_sites, start_time, end_time, time_step, conn)
     med_filename = '../../../data/positions_sample_size_{0}_sqlite.json'.format(str(time_step))
     write_json_to_file(med_filename, median_dict)
@@ -74,3 +94,8 @@ def run():
     coordinate_dict = get_coordinates(tuple(start_site_dict.keys()))
     coord_filename = '../../../data/coordinates_sqlite.json'
     write_json_to_file(coord_filename, coordinate_dict)
+
+    positions, medians = get_ts_from_site(conn, site)
+    ts_filename = '{0}_ts.dat'.format(site)
+    ts_dict = { 'positions': positions, 'medians': medians }
+    write_json_to_file(ts_filename, ts_dict)
