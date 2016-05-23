@@ -112,7 +112,7 @@ def plot_weather_with_GPSsite(monthly_sums, site, site_df):
     ax2.scatter(site_x, site_y, c='red', alpha = 0.3, lw = 0)
     for tl in ax2.get_yticklabels():
         tl.set_color('r')
-    plt.savefig('SEAT_and_precip.png')
+    plt.savefig('SEAT_and_precip.png', transparent = True)
     plt.show()
 
 def get_single_site(site, conn, min_date):

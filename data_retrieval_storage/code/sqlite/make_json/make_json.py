@@ -96,6 +96,6 @@ def run():
     write_json_to_file(coord_filename, coordinate_dict)
 
     positions, medians = get_ts_from_site(conn, site)
-    ts_filename = '{0}_ts.dat'.format(site)
+    ts_filename = '../../../data/{0}_ts.dat'.format(site)
     ts_dict = { 'positions': positions, 'medians': medians }
     write_json_to_file(ts_filename, ts_dict)
