@@ -6,6 +6,7 @@ import os
 import pandas as pd
 import numpy
 import csv
+import time
 
 def get_sites():
     '''Return a list of unique sites in the UNAVCO FTP site.
@@ -142,6 +143,7 @@ def run():
     conn = get_db_conn()
     for site in sites:
         try:
+            start = time.time()
             print ('Getting site {0}'.format(site))
             get_positions(site, download)
             lines, coordinate_data = read_csv_contents('{0}.pbo.final_nam08.pos'.format(site), site)
@@ -155,5 +157,7 @@ def run():
             send_med_to_db(df_medians, conn)
             print ('Sent meds to db')
             remove_site_file(site)
+            end = time.time()
+            print ('It took {0} seconds to collect and send {1} to db'.format(end-start, site))
         except Exception as e:
             print e
