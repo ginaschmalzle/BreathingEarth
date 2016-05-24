@@ -19,33 +19,36 @@
         // Create the map.
         //TODO: Update Center Lat Lng to be more centralized to our data set
         map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 5,
+            zoom: 3,
             center: {
-                lat: 45.090,
-                lng: -120.712
+                lat: 40.92,
+                lng: 261.67
             },
-            mapTypeId: google.maps.MapTypeId.TERRAIN
+            mapTypeId: google.maps.MapTypeId.HYBRID
         });
 
 
         getCoordinates(function(response) {
             coordlist = JSON.parse(response);
-            //console.log(coordlist);
-
         });
 
         sortDateList(function(response) {
             // Parse JSON string into object
             datelist = JSON.parse(response);
-            //console.log(datelist);
 
             for (var dates in datelist) {
-                //console.log(dates);
                 datelistArray.push(dates);
                 datelistArray.sort();
             };
             getMinMaxDates();
-        })
+
+            var date = datelistArray[1];
+            console.log(date);
+            parsePointsInDate(date);
+            fillTableAndPlotPoints();
+        });
+
+
     }
 
     //Get min/max dates for determining start/end points on slider
@@ -61,7 +64,7 @@
     //TODO: dynamically set per data
     $(function() {
             $("#slider").slider({
-                value: 0,
+                value: 1,
                 min: 0,
                 max: 101,
                 step: 1,
@@ -95,27 +98,39 @@
           Circles[x].setMap(null);
         }
         Circles = [];
-        document.querySelector('#datatable').innerHTML = '<table id="datatable" class="text-center table table-striped"><thead><tr><th>Loc</th><th>Lat</th><th>Lng</th><th>Change</th></tr></thead></table>';
+        //document.querySelector('#datatable').innerHTML = '<table id="datatable" class="text-center table table-striped"><thead><tr><th>GPS Name</th><th>Lat</th><th>Lng</th><th>Change</th></tr></thead></table>';
     }
 
     function plotPoints(pointName) {
+        var changedValue = parseChangeInPointsByDate(dateForPointsInDate,pointName)*1000000;
+        var color = (changedValue > 0) ? '#FF0000' : '#0000FF';
+
         cityCircle = {
-            strokeColor: '#FF0000',
+            strokeColor: color,
             strokeOpacity: 0.8,
             strokeWeight: 2,
-            fillColor: '#FF0000',
+            fillColor: color,
             fillOpacity: 0.35,
             map: map,
             center: coordlist[pointName], //.coordinates,
-            radius: 10000 //Math.sqrt(citymap[city].adj_du) * 100000
+            radius: changedValue, //Math.sqrt(citymap[city].adj_du) * 100000
+            clickable: true,
+            name: pointName
         };
+
+        google.maps.event.addListener(cityCircle, 'click', function(ev){
+            document.querySelector('#gps-label').innerHTML = this.name;
+            document.querySelector('#gps-data').innerHTML = 'Lat: '+ this.center.lat+'<br />Lng: '+this.center.lng;
+            $('#datatable').append("<tr><td>"+pointName+"</td><td>"+coordlist[pointName].lat+"</td><td>"+coordlist[pointName].lng+"</td><td>"+parseChangeInPointsByDate(dateForPointsInDate,pointName)+"</td></tr>");
+        });
 
         Circles.push(new google.maps.Circle(cityCircle));
     }
 
+    /* Not used atm 
     function fillTable(pointName) {        
         $('#datatable').append("<tr><td>"+pointName+"</td><td>"+coordlist[pointName].lat+"</td><td>"+coordlist[pointName].lng+"</td><td>"+parseChangeInPointsByDate(dateForPointsInDate,pointName)+"</td></tr>");
-    }
+    }*/
 
     function fillTableAndPlotPoints() {
         //Clear existing data
@@ -126,8 +141,8 @@
         {
           plotPoints(pointsInDate[x]);
           //TODO: Add table with pagination support (datatables?)
-          if(x < 11) 
-            fillTable(pointsInDate[x]);
+          //if(x < 11) 
+            //fillTable(pointsInDate[x]);
         }
     }
 
@@ -136,7 +151,7 @@
     function getCoordinates(callback) {
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
-        xobj.open('GET', 'static/data/coordinates.json', true); // Replace 'my_data' with the path to your file
+        xobj.open('GET', 'static/data/coordinates_sqlite.json', true); // Replace 'my_data' with the path to your file
         xobj.onreadystatechange = function() {
             if (xobj.readyState == 4 && xobj.status == "200") {
                 // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
@@ -149,7 +164,7 @@
     function sortDateList(callback) {
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
-        xobj.open('GET', 'static/data/positions_sample_size_30_pnw.json', true); // Replace 'my_data' with the path to your file
+        xobj.open('GET', 'static/data/positions_sample_size_30_sqlite.json', true); // Replace 'my_data' with the path to your file
         xobj.onreadystatechange = function() {
             if (xobj.readyState == 4 && xobj.status == "200") {
                 // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
