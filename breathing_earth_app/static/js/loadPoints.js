@@ -99,15 +99,19 @@
     }
 
     function plotPoints(pointName) {
+        var changedValue = parseChangeInPointsByDate(dateForPointsInDate,pointName)*1000000;
+        var color = (changedValue > 0) ? '#FF0000' : '#0000FF';
+        console.log('changed value : '+changedValue + ' , color: '+color);
+
         cityCircle = {
-            strokeColor: '#FF0000',
+            strokeColor: color,
             strokeOpacity: 0.8,
             strokeWeight: 2,
-            fillColor: '#FF0000',
+            fillColor: color,
             fillOpacity: 0.35,
             map: map,
             center: coordlist[pointName], //.coordinates,
-            radius: 10000 //Math.sqrt(citymap[city].adj_du) * 100000
+            radius: changedValue //Math.sqrt(citymap[city].adj_du) * 100000
         };
 
         Circles.push(new google.maps.Circle(cityCircle));
@@ -136,7 +140,7 @@
     function getCoordinates(callback) {
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
-        xobj.open('GET', 'static/data/coordinates.json', true); // Replace 'my_data' with the path to your file
+        xobj.open('GET', 'static/data/coordinates_sqlite.json', true); // Replace 'my_data' with the path to your file
         xobj.onreadystatechange = function() {
             if (xobj.readyState == 4 && xobj.status == "200") {
                 // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
@@ -149,7 +153,7 @@
     function sortDateList(callback) {
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
-        xobj.open('GET', 'static/data/positions_sample_size_30_pnw.json', true); // Replace 'my_data' with the path to your file
+        xobj.open('GET', 'static/data/positions_sample_size_30_sqlite.json', true); // Replace 'my_data' with the path to your file
         xobj.onreadystatechange = function() {
             if (xobj.readyState == 4 && xobj.status == "200") {
                 // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
