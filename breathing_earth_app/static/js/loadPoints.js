@@ -127,8 +127,8 @@
         Circles.push(new google.maps.Circle(cityCircle));
     }
 
-    /* Not used atm 
-    function fillTable(pointName) {        
+    /* Not used atm
+    function fillTable(pointName) {
         $('#datatable').append("<tr><td>"+pointName+"</td><td>"+coordlist[pointName].lat+"</td><td>"+coordlist[pointName].lng+"</td><td>"+parseChangeInPointsByDate(dateForPointsInDate,pointName)+"</td></tr>");
     }*/
 
@@ -141,7 +141,7 @@
         {
           plotPoints(pointsInDate[x]);
           //TODO: Add table with pagination support (datatables?)
-          //if(x < 11) 
+          //if(x < 11)
             //fillTable(pointsInDate[x]);
         }
     }
@@ -164,7 +164,7 @@
     function sortDateList(callback) {
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
-        xobj.open('GET', 'static/data/positions_sample_size_30_sqlite.json', true); // Replace 'my_data' with the path to your file
+        xobj.open('GET', 'static/data/positions_sample_size_30_pnw.json', true); // Replace 'my_data' with the path to your file
         xobj.onreadystatechange = function() {
             if (xobj.readyState == 4 && xobj.status == "200") {
                 // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode

@@ -79,14 +79,14 @@ $(function() {
         var interval = setInterval(function() {
             $("#amount").val(x);
             $("#slider").slider('value', x);
-            
+
 
             x++;
             if (x > 100 || stop==0) {
                 clearInterval(interval); // If exceeded 100, clear interval
             }
 
-        }, 7000); // Run every 7 seconds
+        }, 1500); // Run every 7 seconds
 
     });
     document.querySelector("#stop_btn").addEventListener("click", function() {
@@ -94,7 +94,7 @@ $(function() {
     });
 });
 
-$( "#slider" ).on( "slidechange", function( event, ui ) { 
+$( "#slider" ).on( "slidechange", function( event, ui ) {
     var date = datelistArray[ui.value];
     $('#amount').val(date);
     parsePointsInDate(date);
