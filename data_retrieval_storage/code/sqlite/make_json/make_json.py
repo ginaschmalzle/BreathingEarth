@@ -38,7 +38,7 @@ def make_dict_of_medians(start_site_dict, problem_sites, start_time, end_time, t
                    AND c.lat >= {1} \
                    AND c.lat <= {2} \
                    AND c.lng >= {3} \
-                   AND c.lng >= {4} \
+                   AND c.lng <= {4} \
                    AND m.site IN {5}".format(time_str,
                                            minlat,
                                            maxlat,
