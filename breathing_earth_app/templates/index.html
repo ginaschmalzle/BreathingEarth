@@ -7,12 +7,12 @@
             <br />
             <div style="width: 53%; margin: 0 auto;">
                 <p>
-                    <label for="amount">Year:</label>
+                    <label for="amount">Date:</label>
                     <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
                 </p>
                 <div id="slider"></div>
                 <br />
-                <button id="play_btn" class="btn btn-success">Play</button>
+                <button id="play_btn" class="btn btn-success">Play</button>&nbsp;<button id="stop_btn" class="btn btn-danger">stop</button>
             </div>
             <br />
             <table id="datatable" class="text-center table table-striped">
@@ -25,6 +25,7 @@
                     </tr>
                 </thead>
             </table>
+            <button id="clearTable" class="btn btn-info">Clear History</button>
         </div>
     </div>
     <!-- Data plots -->
@@ -34,22 +35,12 @@
                 <h2>Data Plots</h2>
             </div>
             <hr />
-            <!-- TODO: Turn this into repeater using angular/jquery/handlebars... -->
-            <div class="col-lg-4 col-sm-6 text-center">
-                <img class="img-responsive img-center" src="https://raw.githubusercontent.com/ginaschmalzle/BreathingEarth/master/data_retrieval_storage/code/utils/figures/pnw_ts/time_series_0.png?raw=true" alt="">
-                <small>Plot 1</small>
+            <div class="col-lg-2 col-sm-3">
+                <h2 id='gps-label'></h2>
+                <div id='gps-data'></div>
             </div>
-            <div class="col-lg-4 col-sm-6 text-center">
-                <img class="img-responsive img-center" src="https://raw.githubusercontent.com/ginaschmalzle/BreathingEarth/master/data_retrieval_storage/code/utils/figures/pnw_ts/time_series_1.png?raw=true" alt="">
-                <small>Plot 2</small>
-            </div>
-            <div class="col-lg-4 col-sm-6 text-center">
-                <img class="img-responsive img-center" src="https://raw.githubusercontent.com/ginaschmalzle/BreathingEarth/master/data_retrieval_storage/code/utils/figures/pnw_ts/time_series_2.png?raw=true" alt="">
-                <small>Plot 3</small>
-            </div>
-            <div class="col-lg-4 col-sm-6 text-center">
-                <img class="img-responsive img-center" src="https://raw.githubusercontent.com/ginaschmalzle/BreathingEarth/master/data_retrieval_storage/code/utils/figures/pnw_ts/time_series_3.png?raw=true" alt="">
-                <small>Plot 4</small>
+            <div class="col-lg-9 col-sm-8">
+                <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
             </div>
         </div>
     </div>
@@ -80,28 +71,85 @@
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>
 <script>
 $(function() {
+    var stop = 0;
     document.querySelector("#play_btn").addEventListener("click", function() {
         var x = $("#slider").slider("value");
-
+        stop = 1;
         // Called the function in each second
         var interval = setInterval(function() {
             $("#amount").val(x);
             $("#slider").slider('value', x);
-            console.log(x);
+            
 
             x++;
-            if (x > 2016) {
+            if (x > 100 || stop==0) {
                 clearInterval(interval); // If exceeded 100, clear interval
             }
-        }, 1000); // Run for each second
+
+        }, 7000); // Run every 7 seconds
+
+    });
+    document.querySelector("#stop_btn").addEventListener("click", function() {
+        stop = 0;
     });
 });
 
 $( "#slider" ).on( "slidechange", function( event, ui ) { 
     var date = datelistArray[ui.value];
+    $('#amount').val(date);
     parsePointsInDate(date);
     fillTableAndPlotPoints();
+});
 
+$('#clearTable').on('click', function(event, ui ) {
+    document.querySelector('#datatable').innerHTML = '<table id="datatable" class="text-center table table-striped"><thead><tr><th>GPS Name</th><th>Lat</th><th>Lng</th><th>Change</th></tr></thead></table>';
+    document.querySelector('#gps-label').innerHTML = '';
+    document.querySelector('#gps-data').innerHTML = '';
+});
+
+
+
+
+
+
+$(function () {
+    $('#container').highcharts({
+        title: {
+            text: 'Monthly Average Variance',
+            x: -20 //center
+        },
+        subtitle: {
+            text: 'Source: GPS Sites',
+            x: -20
+        },
+        xAxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        },
+        yAxis: {
+            title: {
+                text: 'Temperature (°C)'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            valueSuffix: '°C'
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle',
+            borderWidth: 0
+        },
+        series: [{
+            name: 'SEAT',
+            data: [-0.9, 0.6, 3.5, 8.4, 13.5, 17.0, 18.6, 17.9, 14.3, 9.0, 3.9, 1.0]
+        }]
+    });
 });
 </script>
 {% endblock %}
