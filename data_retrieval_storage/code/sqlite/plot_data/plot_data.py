@@ -171,7 +171,7 @@ def plot_subplot_ts(df, site, coordinate_dict, ax, eq):
     ax.plot([2008,2016],[0,0], color = 'red')
     if eq == True:
         ax.plot([2010.2546803652967,2010.2546803652967],[-100,100], color = 'red')
-    plt.ylabel('Vertical Position (mm)')
+    # plt.ylabel('Vertical Position (mm)')
 
 def plot_subset_of_site_ts(df, subset_sites, rows, columns, coordinate_dict, show, filename, eq):
     '''Subset should contain 4 or less sites.'''
