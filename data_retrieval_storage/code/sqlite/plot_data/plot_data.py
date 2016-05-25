@@ -157,7 +157,7 @@ def get_all_sites(conn, min_date):
     all_df = all_df.loc[all_df.date >= min_date]
     all_df['datetime'] = pd.to_datetime(all_df['date'])
     all_df['Position_mm'] = all_df['Position_m'] * 1000
-    return mindf
+    return all_df
 
 def plot_subplot_ts(df, site, coordinate_dict, ax, eq):
     site_df = df.loc[ (df['site'] == site) ]
@@ -219,7 +219,7 @@ def run():
     all_df = get_all_sites(conn, min_date)
     rows = 2; columns = 2
 
-    mpl.rcParams.update({'font.size': 12})
+    mpl.rcParams.update({'font.size': 18})
     mpl.rcParams['figure.titlesize'] = 'medium'
     for subset_sites in [eq_sites, oil_sites, glacier_sites, sea_level_sites]:
         eq = False
