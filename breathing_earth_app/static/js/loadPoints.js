@@ -19,10 +19,10 @@
         // Create the map.
         //TODO: Update Center Lat Lng to be more centralized to our data set
         map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 3,
+            zoom: 5, //3,
             center: {
-                lat: 40.92,
-                lng: 261.67
+                lat: 45.090, //40.92,
+                lng: -120.712 //261.67
             },
             mapTypeId: google.maps.MapTypeId.HYBRID
         });
@@ -32,7 +32,7 @@
             coordlist = JSON.parse(response);
         });
 
-        sortDateList(function(response) {
+        load_pnw(function(response) {
             // Parse JSON string into object
             datelist = JSON.parse(response);
 
@@ -72,8 +72,19 @@
                     $("#amount").val(ui.value);
                 }
             });
-            $("#amount").val($("#slider").slider("value"));
+            $("#amount").val('2008-01-31');
         });
+    $(function() {
+        $("#slider").on("slidechange", function(event, ui) {
+            var date = datelistArray[ui.value];
+            var short_date = date.split(' ');
+            short_date = short_date[0];
+            $('#amount').val(short_date);
+            parsePointsInDate(date);
+            fillTableAndPlotPoints();
+            updateTable();
+        });
+    });
 
     //Grab all the points that had changes for the date and store in pointsInDate object
     function parsePointsInDate(dateval) {
@@ -101,6 +112,12 @@
         //document.querySelector('#datatable').innerHTML = '<table id="datatable" class="text-center table table-striped"><thead><tr><th>GPS Name</th><th>Lat</th><th>Lng</th><th>Change</th></tr></thead></table>';
     }
 
+    function updateTable(pointName, changedValue) {
+        if($('#'+pointName+'_change').length > 0)
+            $('#'+ pointName +'_change').text(parseFloat(changedValue).toFixed(4));
+
+    }
+
     function plotPoints(pointName) {
         var changedValue = parseChangeInPointsByDate(dateForPointsInDate,pointName)*1000000;
         var color = (changedValue > 0) ? '#FF0000' : '#0000FF';
@@ -118,19 +135,16 @@
             name: pointName
         };
 
+        updateTable(pointName, (changedValue/1000000));
+
         google.maps.event.addListener(cityCircle, 'click', function(ev){
-            document.querySelector('#gps-label').innerHTML = this.name;
-            document.querySelector('#gps-data').innerHTML = 'Lat: '+ this.center.lat+'<br />Lng: '+this.center.lng;
-            $('#datatable').append("<tr><td>"+pointName+"</td><td>"+coordlist[pointName].lat+"</td><td>"+coordlist[pointName].lng+"</td><td>"+parseChangeInPointsByDate(dateForPointsInDate,pointName)+"</td></tr>");
+            //document.querySelector('#gps-label').innerHTML = this.name;
+            //document.querySelector('#gps-data').innerHTML = 'Lat: '+ this.center.lat+'<br />Lng: '+this.center.lng;
+            $('#datatable').append("<tr><td>"+pointName+"</td><td>"+coordlist[pointName].lat+"</td><td>"+coordlist[pointName].lng+"</td><td id='"+pointName+"_change'>"+parseFloat(parseChangeInPointsByDate(dateForPointsInDate,pointName)).toFixed(4)+"</td></tr>");
         });
 
         Circles.push(new google.maps.Circle(cityCircle));
     }
-
-    /* Not used atm
-    function fillTable(pointName) {
-        $('#datatable').append("<tr><td>"+pointName+"</td><td>"+coordlist[pointName].lat+"</td><td>"+coordlist[pointName].lng+"</td><td>"+parseChangeInPointsByDate(dateForPointsInDate,pointName)+"</td></tr>");
-    }*/
 
     function fillTableAndPlotPoints() {
         //Clear existing data
@@ -140,9 +154,6 @@
         for(var x = 0; x < pointsInDate.length; x++)
         {
           plotPoints(pointsInDate[x]);
-          //TODO: Add table with pagination support (datatables?)
-          //if(x < 11)
-            //fillTable(pointsInDate[x]);
         }
     }
 
@@ -161,10 +172,10 @@
         xobj.send(null);
     }
 
-    function sortDateList(callback) {
+    function load_pnw(callback) {
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
-        xobj.open('GET', 'static/data/positions_sample_size_30_sqlite.json', true); // Replace 'my_data' with the path to your file
+        xobj.open('GET', 'static/data/positions_sample_size_30_sqlite_pnw.json', true); // Replace 'my_data' with the path to your file
         xobj.onreadystatechange = function() {
             if (xobj.readyState == 4 && xobj.status == "200") {
                 // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
@@ -173,3 +184,29 @@
         };
         xobj.send(null);
     }
+
+    function load_sw(callback) {
+        var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+        xobj.open('GET', 'static/data/positions_sample_size_30_sqlite_sw.json', true); // Replace 'my_data' with the path to your file
+        xobj.onreadystatechange = function() {
+            if (xobj.readyState == 4 && xobj.status == "200") {
+                // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+                callback(xobj.responseText);
+            }
+        };
+        xobj.send(null);
+    }
+
+    function load_alaska(callback) {
+        var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+        xobj.open('GET', 'static/data/positions_sample_size_30_sqlite_alaska.json', true); // Replace 'my_data' with the path to your file
+        xobj.onreadystatechange = function() {
+            if (xobj.readyState == 4 && xobj.status == "200") {
+                // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+                callback(xobj.responseText);
+            }
+        };
+        xobj.send(null);
+    }    

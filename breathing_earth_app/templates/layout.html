@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}" type="text/css" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css" />
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+
 <!-- jQuery + Bootstrap -->
 <script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
@@ -16,6 +18,11 @@
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <!-- Highcharts -->
 <script src="https://code.highcharts.com/highcharts.js"></script>
+
+<!-- Pips jQuery Slider -->
+<script src="{{ url_for('static', filename='js/jquery-ui-slider-pips.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui-slider-pips.css') }}" type="text/css" />
+
 
 <div class="page">
     <header>
@@ -32,18 +39,6 @@
                 <ul class="list-inline">
                     <li>
                         <a href="#">Home</a>
-                    </li>
-                    <li class="footer-menu-divider">⋅</li>
-                    <li>
-                        <a href="#about">About</a>
-                    </li>
-                    <li class="footer-menu-divider">⋅</li>
-                    <li>
-                        <a href="#services">Services</a>
-                    </li>
-                    <li class="footer-menu-divider">⋅</li>
-                    <li>
-                        <a href="#contact">Contact</a>
                     </li>
                 </ul>
                 <p class="copyright text-muted small">Breathing Earth 2016</p>
