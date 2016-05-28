@@ -1,17 +1,37 @@
 # BreathingEarth
 
+View live demo: http://geodesygina.com/BreathingEarth/index.html
+
 Preview:
 ![alt tag](https://raw.githubusercontent.com/13scoobie/BreathingEarth/master/breathing_earth_app/static/images/Breathing%20Earth.png)
 
-View on github pages:
+What is Breathing Earth?
+-------------
 
-How to run locally?
-1. Install npm and nodejs
-2. run this command to get http-server installed
-    - npm install http-server -g
-    * the g installs globally, so you can run servers from any folder for demo or test
-3. After it is installed, navigate to the site folder where you have index.html
-4. Open terminal and run http-server
-5. This will start a local http-server to which you can open your browser and, by default on port 8080, you should see the site!
+*Breathing Earth is an open-source visualization of GPS data to demonstrate
+the effects of precipitation, land saturation and cyclical movement of the
+Earth's surface. In the winter months, precipitation saturates the ground,
+making the ground heavy, and pushing it down. Then, in the summer, water
+evaporates, removing the heavy water and causing lift. Other events also
+affect the Earth's surface, such as Earthquakes, oil pumping and mining operations.
 
-Disclaimer: You will need to get a google maps API key if you dont have one and add it into the bottom of index.html
+Take a look, visit our site and enjoy!
+
+-The Breathing Earth Team*
+
+
+Installation & Configuration
+----------------------------
+To get started with Breathing Earth, you can simply download this repo and run with python:
+
+```bash
+cd breathing_earth_app
+python BreathingEarth.py
+```
+
+Breathing Earth has been tested and is compatible with `Python 2.7`
+
+Disclaimer:
+-----------
+*You will need to get a google maps API key if you don't have one and add it into the bottom of index.html*
+You can obtain one by going here: https://console.developers.google.com/

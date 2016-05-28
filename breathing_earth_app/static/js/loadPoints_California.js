@@ -2,10 +2,10 @@ function initMap() {
     // Create the map.
     //TODO: Update Center Lat Lng to be more centralized to our data set
     map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 5, //3,
+        zoom: 6,
         center: {
-            lat: 45.090, //40.92,
-            lng: -120.712 //261.67
+            lat: 36.016,
+            lng: -118.370
         },
         mapTypeId: google.maps.MapTypeId.HYBRID
     });
@@ -14,7 +14,7 @@ function initMap() {
         coordlist = JSON.parse(response);
     });
 
-    load_pnw(function(response) {
+    load_california(function(response) {
         // Parse JSON string into object
         datelist = JSON.parse(response);
 
@@ -31,10 +31,10 @@ function initMap() {
     });
 }
 
-function load_pnw(callback) {
+function load_california(callback) {
     var xobj = new XMLHttpRequest();
     xobj.overrideMimeType("application/json");
-    xobj.open('GET', 'static/data/positions_sample_size_30_sqlite_pnw.json', true); // Replace 'my_data' with the path to your file
+    xobj.open('GET', 'static/data/positions_sample_size_30_sqlite_sw.json', true); // Replace 'my_data' with the path to your file
     xobj.onreadystatechange = function() {
         if (xobj.readyState == 4 && xobj.status == "200") {
             // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
