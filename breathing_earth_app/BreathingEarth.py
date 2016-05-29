@@ -5,9 +5,13 @@ app = Flask(__name__)
 def main():
     return render_template('index.html');
 
-@app.route("/test/")
-def testing():
-	return "This is a test"
+@app.route("/Alaska")
+def alaska():
+    return render_template('Alaska.html');
+
+@app.route("/California")
+def california():
+    return render_template('California.html');
 
 if __name__ == "__main__":
     app.run()

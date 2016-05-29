@@ -8,41 +8,111 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css" />
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 
-
 <!-- jQuery + Bootstrap -->
 <script src="{{ url_for('static', filename='js/jquery-2.1.3.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-<!-- DataTables -->
-<script defer src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
 <!-- jQuery slider -->
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-<!-- Highcharts -->
-<script src="https://code.highcharts.com/highcharts.js"></script>
 
 <!-- Pips jQuery Slider -->
 <script src="{{ url_for('static', filename='js/jquery-ui-slider-pips.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui-slider-pips.css') }}" type="text/css" />
 
-
 <div class="page">
-    <header>
-        <div class="text-center">
-            <h2><p>Welcome to Breathing Earth</p></h2>
-        </div>
-    </header>
-    {% block body %}{% endblock %}
-</div>
-<footer>
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <ul class="list-inline">
-                    <li>
-                        <a href="#">Home</a>
-                    </li>
-                </ul>
-                <p class="copyright text-muted small">Breathing Earth 2016</p>
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Breathing Earth</a>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="/">Pacific Northwest <span class="sr-only">(current)</span></a></li>
+                        <li><a href="/Alaska">Alaska</a></li>
+                        <li><a href="/California">California</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="row" style="padding-bottom: 25px;"><div class="box">&nbsp;</div></div>
+        <!-- Google Map Content -->
+        <div class="row subsection">
+            <div class="box">
+                <div id="map"></div>
+                <br />
+                <div style="width: 53%; margin: 0 auto;">
+                    <p>
+                        <label for="amount">Date:</label>
+                        <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+                    </p>
+                    <div id="slider"></div>
+                    <br />
+                    <button id="play_btn" class="btn btn-success">Play</button>&nbsp;
+                    <button id="stop_btn" class="btn btn-danger">stop</button>
+                </div>
+                <br />
+                <table id="datatable" class="text-center table table-striped">
+                    <thead>
+                        <tr>
+                            <th>GPS Name</th>
+                            <th>Lat</th>
+                            <th>Lng</th>
+                            <th>Change (in meters)</th>
+                        </tr>
+                    </thead>
+                </table>
+                <button id="clearTable" class="btn btn-info">Clear History</button>
             </div>
         </div>
     </div>
-</footer>
+    {% block body %}{% endblock %}
+</div>
+<!-- Our Team (going to be included on poster -->
+<div class="container">
+    <div class="row subsection">
+        <div class="box">
+            <div class="row ourTeam">
+                <div class="box" style="height:100%;">
+                    <div class="col-lg-12">
+                        <h2>Our Team</h2>
+                    </div>
+                    <hr />
+                    <!-- TODO: save linkedin images locally or create static for presentation without internet. Could also add repeater here to allow more members at a later date -->
+                    <div class="col-lg-4 col-sm-6 text-center">
+                        <img class="img-circle img-responsive img-center" src="https://media.licdn.com/media/p/4/005/05d/0db/3cc1f0d.jpg" alt="">
+                        <h3>Gina Schmalzle<br /><small>Data Scientist</small></h3>
+                        <p><a href="https://www.linkedin.com/in/gina-schmalzle-23408a13" target="_blank">LinkedIn</a>&nbsp;|&nbsp;<a href="http://github.com/ginaschmalzle" target="_blank">Github</a></p>
+                    </div>
+                    <div class="col-lg-4 col-sm-6 text-center">
+                        <img class="img-circle img-responsive img-center" src="https://media.licdn.com/mpr/mpr/shrinknp_400_400/p/5/005/06d/16d/1665555.jpg" alt="">
+                        <h3>David White<br /><small>Software Engineer</small></h3>
+                        <p><a href="https://www.linkedin.com/in/david-white-7b851141" target="_blank">LinkedIn</a>&nbsp;|&nbsp;<a href="http://github.com/13scoobie" target="_blank">Github</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <ul class="list-inline">
+                        <li>
+                            <a href="#">Home</a>
+                        </li>
+                    </ul>
+                    <p class="copyright text-muted small">Breathing Earth 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Google Maps -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>
+    <script src="{{ url_for('static', filename='js/slider_btn.js') }}"></script>
