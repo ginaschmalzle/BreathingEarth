@@ -7,12 +7,9 @@ View live demo: http://geodesygina.com/BreathingEarth/index.html
 What is Breathing Earth?
 -------------
 
-Breathing Earth is an open-source visualization of GPS data to demonstrate
-the effects of precipitation, land saturation and cyclical movement of the
-Earth's surface. In the winter months, precipitation saturates the ground,
-making the ground heavy, and pushing it down. Then, in the summer, water
-evaporates, removing the heavy water and causing lift. Other events also
-affect the Earth's surface, such as Earthquakes, oil pumping and mining operations.
+Breathing Earth is an open-source visualization of how ground height changes over time.  
+
+We use high precision GPS vertical position estimates to visualize changes in ground height due to precipitation, earthquakes, tectonics, glacial melt, as well as human induced water/oil and gas pumping. Stay tuned for a complete write up of this project at geodesygina.com.
 
 Take a look, visit our site and enjoy!
 
